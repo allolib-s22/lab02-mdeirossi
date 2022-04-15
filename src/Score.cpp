@@ -17,7 +17,7 @@
 using namespace al;
 
 
-#define A4_FREQ = 440.0f
+constexpr float A4_FREQ = 440.0f;
 
 
 class FM : public SynthVoice
@@ -166,19 +166,26 @@ enum Accidental {
 
 
 class TimeSignature {
-    TimeSignature(int numBeats, int beatType) {
-        if (numBeats < 1 || beatType < 1) {
-            throw std::invalid_argument("TimeSignature arguments must be greater than 0");
+    public:
+        TimeSignature() {
+            this->numBeats = 4;
+            this->beatType = 4;
+            this->beatUnits = 1024;
         }
-        if ((beatType & (beatType - 1)) != 0) {
-            throw std::invalid_argument("TimeSignature beatType must be a power of 2");
-        }
-        this->numBeats = numBeats;
-        this->beatType = beatType;
-        this->beatUnits = (4.0f / beatType) * numBeats * 256
-    }
 
-    int getBeatUnits() { return this->beatUnits; }
+        TimeSignature(int numBeats, int beatType) {
+            if (numBeats < 1 || beatType < 1) {
+                throw std::invalid_argument("TimeSignature arguments must be greater than 0");
+            }
+            if ((beatType & (beatType - 1)) != 0) {
+                throw std::invalid_argument("TimeSignature beatType must be a power of 2");
+            }
+            this->numBeats = numBeats;
+            this->beatType = beatType;
+            this->beatUnits = (4.0f / beatType) * numBeats * 256;
+        }
+
+        int getBeatUnits() { return this->beatUnits; }
 
     protected:
         int numBeats;
@@ -189,31 +196,22 @@ class TimeSignature {
 
 class Note {
     public:
+        Note() { }
+
         Note(NoteName noteName,
-             Accidental accidental,
-             NoteType noteType,
-             float amplitude,
+            Accidental accidental,
+            NoteType noteType,
+            float amplitude
             )
         {
-            this->freqs->push_back((A4_FREQ * pow(2, (noteName[i] - 57 + accidental[i] - 2) / 12));
+            this->freqs.push_back((A4_FREQ * pow(2, (noteName - 57 + accidental - 2) / 12)));
             this->amplitude = amplitude;
             this->beatUnits = noteType;
             this->rest = true;
         }
 
-        Note(int chordSize,
-             NoteName[] noteNames,
-             Accidental[] accidentals,
-             NoteType noteType,
-             float amplitude
-            )
-        {
-            for (size_t i = 0; i < chordSize; ++i) {
-                this->freqs->push_back((A4_FREQ * pow(2, (noteName[i] - 57 + accidental[i] - 2) / 12));
-            }
-            this->amplitude = amplitude;
-            this->beatUnits = noteType;
-            this->rest = false;
+        void addChord(NoteName noteName, Accidental accidental) {
+            this->freqs.push_back((A4_FREQ * pow(2, (noteName - 57 + accidental - 2) / 12)));
         }
 
         void addDot() {
@@ -236,12 +234,12 @@ class Note {
             beatUnits += (beatUnits / 2 + beatUnits / 4);
         }
 
-        std::vector<float>* getFreqs() { return this->freqs; }
+        std::vector<float> getFreqs() { return this->freqs; }
         float getAmplitude() { return this->amplitude; }
         int getBeatUnits() { return this->beatUnits; }
 
     protected:
-        std::vector<float>* freqs;
+        std::vector<float> freqs;
         float amplitude;
         int beatUnits;
         bool rest;
@@ -259,59 +257,77 @@ class Rest: public Note {
 
 class Measure {
     public:
+        Measure() {
+            this->timeSignature = TimeSignature();
+            this->beatUnitsRemaining = 1024;
+        }
+
         Measure(TimeSignature timeSignature) {
-            this->ts = timeSignature;
+            this->timeSignature = timeSignature;
             this->beatUnitsRemaining = timeSignature.getBeatUnits();
         }
 
-        void addNote(Note* note) {
-            if (note->getBeatUnits() > beatUnitsRemaining) {
+        void addNote(Note note) {
+            if (note.getBeatUnits() > beatUnitsRemaining) {
                 throw std::logic_error("Note length exceeds measure");
             }
-            notes->push_back(note);
-            beatUnitsRemaining -= note->getBeatUnits();
+            notes.push_back(note);
+            beatUnitsRemaining -= note.getBeatUnits();
+        }
+
+        void addChord(NoteName noteName, Accidental accidental) {
+            if (notes.size() < 1) {
+                throw std::logic_error("No existing note to make a chord");
+            }
+            notes.back().addChord(noteName, accidental);
         }
 
         void addDot() {
-            if ((notes->back()->getBeatUnits() / 2) > beatUnitsRemaining) {
+            if ((notes.back().getBeatUnits() / 2) > beatUnitsRemaining) {
                 throw std::logic_error("Note length exceeds measure");
             }
-            notes->back()->addDot();
-            beatUnitsRemaining -= (notes->back()->getBeatUnits() / 2);
+            notes.back().addDot();
+            beatUnitsRemaining -= (notes.back().getBeatUnits() / 2);
         }
 
         void addDoubleDot() {
-            if ((notes->back()->getBeatUnits() / 2 + notes->back()->getBeatUnits() / 4) > beatUnitsRemaining) {
+            if ((notes.back().getBeatUnits() / 2 + notes.back().getBeatUnits() / 4) > beatUnitsRemaining) {
                 throw std::logic_error("Note length exceeds measure");
             }
-            notes->back()->addDoubleDot();
-            beatUnitsRemaining -= (notes->back()->getBeatUnits() / 2 + notes->back()->getBeatUnits() / 4);
+            notes.back().addDoubleDot();
+            beatUnitsRemaining -= (notes.back().getBeatUnits() / 2 + notes.back().getBeatUnits() / 4);
         }
 
         void fillRests() {
 
         }
 
-        TimeSignature getTimeSignature() { return this->ts; }
-        std::vector<Note*>* getNotes() { return this->notes; }
+        TimeSignature getTimeSignature() { return this->timeSignature; }
+        std::vector<Note> getNotes() { return this->notes; }
 
     protected:
-        TimeSignature ts;
-        std::vector<Note*>* notes;
+        TimeSignature timeSignature;
         int beatUnitsRemaining;
+        std::vector<Note> notes;
 };
 
 
 class Score {
     public:
-        Score(&synthManager) {
+        Score() {
+            this->synthManager = NULL;
+            this->initialBPM = 60.0f;
+            this->maxNoteSeparation = 0.5f;
+        }
+
+        Score(SynthGUIManager<FM>* synthManager) {
             this->synthManager = synthManager;
-            initialBPM(60.0f);
-            maxNoteSeparation(0.5f);
+            this->initialBPM = 60.0f;
+            this->maxNoteSeparation = 0.5f;
         }
 
         void addMeasure(TimeSignature timeSignature) {
-            measures->push_back(Measure(timeSignature));
+            measures.push_back(Measure(timeSignature));
         }
 
         void setInitialBPM(float initialBPM) {
@@ -324,15 +340,15 @@ class Score {
 
         void playScore() {
             SynthVoice* voice;
-            Measure* measure;
+            Measure measure;
             Note note;
-            float BPS = (initialBPM / 60.0f)
+            float beatUnitsPerSecond = (initialBPM / 60.0f * 256);
             float currentTime = 0.0f;
-            for (size_t i = 0; i < measures->size(); ++i) {
-                measure = measures->at(i);
-
-                for (size_t j = 0; j < measure->getNotes()->size(); ++j) {
-                    note = measure->getNotes()->at(j);
+            for (size_t i = 0; i < measures.size(); ++i) {
+                measure = measures.at(i);
+                std::cout << measure.getNotes().size() << std::endl;
+                for (size_t j = 0; j < measure.getNotes().size(); ++j) {
+                    note = measure.getNotes().at(j);
 
                     voice = synthManager->synth().getVoice<FM>();
                     voice->setInternalParameterValue("amplitude", note.getAmplitude());
@@ -341,29 +357,28 @@ class Score {
                     voice->setInternalParameterValue("pan", -1.0);
 
 
-                    for (size_t k = 0; k < note.getNotes()->size(); ++k) {
-                        voice->setInternalParameterValue("frequency", note.getFreqs()->at(k));
+                    for (size_t k = 0; k < note.getFreqs().size(); ++k) {
+                        voice->setInternalParameterValue("frequency", note.getFreqs().at(k));
                         synthManager->synthSequencer().addVoiceFromNow(
                             voice,
-                            note.getQuarterStartBeat() / BPS + currentTime,
-                            note.getQuarterBeatDuration() / BPS
+                            currentTime,
+                            note.getBeatUnits() / beatUnitsPerSecond
                         );
                     }
                     
-                    currentTime += note.getQuarterBeatDuration() / BPS;
+                    currentTime += note.getBeatUnits() / beatUnitsPerSecond;
                 }
 
             }
         }
 
-        std::vector<Measure*>* getMeasures() { return this->measures; }
-        Measure* getMeasure(int measureNumber) { return this->measures->at(measureNumber); }
+        Measure getMeasure(int measureNumber) { return this->measures.at(measureNumber); }
 
     protected:
         SynthGUIManager<FM>* synthManager;
         float initialBPM;
         float maxNoteSeparation;
-        std::vector<Measure*>* measures;
+        std::vector<Measure> measures;
 };
 
 
@@ -373,35 +388,33 @@ struct MyApp: public App {
 
     void onInit() override { // Called on app start
         std::cout << "onInit()" << std::endl;
-        score = Score();
+
+        score = Score(&synthManager);
         score.addMeasure(TimeSignature(4, 4));
-        score.getMeasure(0)->addNote(Note(2, {C4, E4}, {natural, flat}, _quarter, 0.5f));
-        score.getMeasure(0)->addNote(Note(1, {G4}, {natural}, _quarter, 0.5f));
+        score.getMeasure(0).addNote(Note(C4, natural, _quarter, 0.5f));
+        //score.getMeasure(0).addChord(E4, flat);
+        score.getMeasure(0).addNote(Note(G4, natural, _quarter, 0.5f));
     }
 
     void onCreate() override { // Called when graphics context is available
         std::cout << "onCreate()" << std::endl;
-        navControl().active(false); // Disable navigation via keyboard
-        // Set sampling rate for Gamma objects from app's audio
+        navControl().active(false);
         gam::sampleRate(audioIO().framesPerSecond());
 
         imguiInit();
+
+        synthManager.synthRecorder().verbose(true);
     }
 
     void onAnimate(double dt) override { // Called once before drawing
-        // The GUI is prepared here
         imguiBeginFrame();
-        // Draw a window that contains the synth control panel
         synthManager.drawSynthControlPanel();
         imguiEndFrame();
     }
 
     void onDraw(Graphics &g) override { // Draw function
         g.clear();
-        // Render the synth's graphics
         synthManager.render(g);
-
-        // GUI is drawn here
         imguiDraw();
     }
 
@@ -418,24 +431,26 @@ struct MyApp: public App {
             return true;
         }
 
+        int midiNote = asciiToMIDI(k.key());
+        if (midiNote > 0) {
+            synthManager.voice()->setInternalParameterValue("freq", pow(2.f, (midiNote - 69.f) / 12.f) * 432.f);
+            synthManager.triggerOn(midiNote);
+        }
+
         switch (k.key()) {
-            case '1':
-                std::cout << "1 pressed!" << std::endl;
-                score.playScore();
-                return false;
-            case ' ':
-                std::cout << "Spacebar pressed!" <<std::endl;
+        case ' ':
+            std::cout << "Spacebar pressed!" << std::endl;
+            score.playScore();
+        }
         return true;
     }
 
-    // Whenever a key is released this function is called
-    bool onKeyUp(Keyboard const &k) override {
-        // int midiNote = asciiToMIDI(k.key());
-        // if (midiNote > 0)
-        // {
-        //   synthManager.triggerOff(midiNote);
-        // }
-        // return true;
+    bool onKeyUp(Keyboard const& k) override {
+        int midiNote = asciiToMIDI(k.key());
+        if (midiNote > 0) {
+            synthManager.triggerOff(midiNote);
+        }
+        return true;
     }
 
     void onExit() override { imguiShutdown(); }
@@ -443,12 +458,9 @@ struct MyApp: public App {
 
 
 int main() {
-    // Create app instance
     MyApp app;
-
-    // Set up audio
+    app.dimensions(800, 600);
     app.configureAudio(48000., 256, 2, 0);
-
     app.start();
     return 0;
 }
