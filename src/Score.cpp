@@ -10,6 +10,9 @@
 #include "al/ui/al_ControlGUI.hpp"
 #include "al/ui/al_Parameter.hpp"
 
+#include "staff.hpp"
+#include "InstrumentCelesta.hpp"
+
 #include <cstdio>
 #include <vector>
 #include <cmath>
@@ -17,409 +20,296 @@
 using namespace al;
 
 
-constexpr float A4_FREQ = 440.0f;
-
-
-class FM : public SynthVoice
+class Score
 {
 public:
-    // Unit generators
-    gam::Pan<> mPan;
-    gam::ADSR<> mAmpEnv;
-    gam::ADSR<> mModEnv;
-    gam::EnvFollow<> mEnvFollow;
-
-    gam::Sine<> car, mod; // carrier, modulator sine oscillators
-
-    // Additional members
-    Mesh mMesh;
-
-    void init() override
+    Score()
     {
-        mAmpEnv.curve(0); // linear segments
-        mAmpEnv.levels(0, 1, 1, 0);
-
-        // We have the mesh be a sphere
-        addDisc(mMesh, 1.0, 30);
-
-        createInternalTriggerParameter("amplitude", 0.5, 0.0, 1.0);
-        createInternalTriggerParameter("freq", 440, 10, 4000.0);
-        createInternalTriggerParameter("attackTime", 0.1, 0.01, 3.0);
-        createInternalTriggerParameter("releaseTime", 0.1, 0.1, 10.0);
-        createInternalTriggerParameter("pan", 0.0, -1.0, 1.0);
-
-        // FM index
-        createInternalTriggerParameter("idx1", 0.01, 0.0, 10.0);
-        createInternalTriggerParameter("idx2", 7, 0.0, 10.0);
-        createInternalTriggerParameter("idx3", 5, 0.0, 10.0);
-
-        createInternalTriggerParameter("carMul", 1, 0.0, 20.0);
-        createInternalTriggerParameter("modMul", 1.0007, 0.0, 20.0);
-        createInternalTriggerParameter("sustain", 0.75, 0.1, 1.0); // Unused
+        this->amplitude = 0.5f;
+        this->beatUnitsPerSecond = 256.0f;
+        this->maxNoteSeparation = 0.5f;
+        this->currentStaff = -1;
     }
 
-    void onProcess(AudioIOData &io) override
+    void addStaff(SynthVoice* instrument, std::string name)
     {
-        float modFreq =
-            getInternalParameterValue("freq") * getInternalParameterValue("modMul");
-        mod.freq(modFreq);
-        float carBaseFreq =
-            getInternalParameterValue("freq") * getInternalParameterValue("carMul");
-        float modScale =
-            getInternalParameterValue("freq") * getInternalParameterValue("modMul");
-        float amp = getInternalParameterValue("amplitude");
-        while (io())
-        {
-            car.freq(carBaseFreq + mod() * mModEnv() * modScale);
-            float s1 = car() * mAmpEnv() * amp;
-            float s2;
-            mEnvFollow(s1);
-            mPan(s1, s1, s2);
-            io.out(0) += s1;
-            io.out(1) += s2;
-        }
-        if (mAmpEnv.done() && (mEnvFollow.value() < 0.001))
-        {
-            free();
-        }
+        staffNames.push_back(name);
+        staves.push_back(Staff(instrument));
+        currentStaff = staffNames.size() - 1;
     }
 
-    void onProcess(Graphics &g) override
+    void setStaff(std::string name)
     {
-        g.pushMatrix();
-        g.translate(getInternalParameterValue("freq") / 300 - 2,
-                    getInternalParameterValue("modAmt") / 25 - 1, -4);
-        float scaling = getInternalParameterValue("amplitude") * 1;
-        g.scale(scaling, scaling, scaling * 1);
-        g.color(HSV(getInternalParameterValue("modMul") / 20, 1,
-                    mEnvFollow.value() * 10));
-        g.draw(mMesh);
-        g.popMatrix();
+        std::vector<std::string>::iterator it = std::find(staffNames.begin(), staffNames.end(), name);
+        if (it == staffNames.end()) {
+            std::cerr << "No staff with name " << name << std::endl;
+            throw std::invalid_argument("No staff with name " + name);
+        }
+        currentStaff = it - staffNames.begin();
     }
 
-    void onTriggerOn() override
+    void addMeasure(TimeSignature timeSignature)
     {
-        mModEnv.levels()[0] = getInternalParameterValue("idx1");
-        mModEnv.levels()[1] = getInternalParameterValue("idx2");
-        mModEnv.levels()[2] = getInternalParameterValue("idx2");
-        mModEnv.levels()[3] = getInternalParameterValue("idx3");
-
-        mAmpEnv.lengths()[0] = getInternalParameterValue("attackTime");
-        mModEnv.lengths()[0] = getInternalParameterValue("attackTime");
-
-        mAmpEnv.lengths()[1] = 0.001;
-        mModEnv.lengths()[1] = 0.001;
-
-        mAmpEnv.lengths()[2] = getInternalParameterValue("releaseTime");
-        mModEnv.lengths()[2] = getInternalParameterValue("releaseTime");
-        mPan.pos(getInternalParameterValue("pan"));
-
-        // mModEnv.lengths()[1] = mAmpEnv.lengths()[1];
-
-        mAmpEnv.reset();
-        mModEnv.reset();
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
+        }
+        staves.at(currentStaff).getMeasures().push_back(Measure(timeSignature));
     }
 
-    void onTriggerOff() override
+    void addMeasure()
     {
-        mAmpEnv.triggerRelease();
-        mModEnv.triggerRelease();
+
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
+        }
+        if (staves.at(currentStaff).getMeasures().size() < 1) {
+            std::cerr << "Time signature required in first measure" << std::endl;
+            throw std::invalid_argument("Time signature required in first measure");
+        }
+        staves.at(currentStaff).getMeasures().push_back(Measure(staves.at(currentStaff).getMeasures().back().getTimeSignature()));
     }
-};
 
-enum NoteName {
-    C0 = 0, D0 = 2, E0 = 4, F0 = 5, G0 = 7, A0 = 9, B0 = 11,
-    C1 = 12, D1 = 14, E1 = 16, F1 = 17, G1 = 19, A1 = 21, B1 = 23,
-    C2 = 24, D2 = 26, E2 = 28, F2 = 29, G2 = 31, A2 = 33, B2 = 35,
-    C3 = 36, D3 = 38, E3 = 40, F3 = 41, G3 = 43, A3 = 45, B3 = 47,
-    C4 = 48, D4 = 50, E4 = 52, F4 = 53, G4 = 55, A4 = 57, B4 = 59,
-    C5 = 60, D5 = 62, E5 = 64, F5 = 65, G5 = 67, A5 = 69, B5 = 71,
-    C6 = 72, D6 = 74, E6 = 76, F6 = 77, G6 = 79, A6 = 81, B6 = 83,
-    C7 = 84, D7 = 86, E7 = 88, F7 = 89, G7 = 91, A7 = 93, B7 = 95,
-    C8 = 96, D8 = 98, E8 = 100, F8 = 101, G8 = 103, A8 = 105, B8 = 107
-};
-
-enum NoteType {
-    _1024th = 1,
-    _512th = 2,
-    _256th = 4,
-    _128th = 8,
-    _64th = 16,
-    _32nd = 32,
-    _16th = 64,
-    _eighth = 128,
-    _quarter = 256,
-    _half = 512,
-    _whole = 1024,
-    _breve = 2048,
-    _long = 4096,
-    _maxima = 8192
-};
-
-enum Accidental {
-    doubleFlat = 0,
-    flat = 1,
-    natural = 2,
-    sharp = 3,
-    doubleSharp = 4
-};
-
-
-class TimeSignature {
-    public:
-        TimeSignature() {
-            this->numBeats = 4;
-            this->beatType = 4;
-            this->beatUnits = 1024;
+    void addNote(NoteName name, Accidental accidental, NoteType type)
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
         }
+        staves.at(currentStaff).getMeasures().back().addNote(Note(name, accidental, type));
+    }
 
-        TimeSignature(int numBeats, int beatType) {
-            if (numBeats < 1 || beatType < 1) {
-                throw std::invalid_argument("TimeSignature arguments must be greater than 0");
-            }
-            if ((beatType & (beatType - 1)) != 0) {
-                throw std::invalid_argument("TimeSignature beatType must be a power of 2");
-            }
-            this->numBeats = numBeats;
-            this->beatType = beatType;
-            this->beatUnits = (4.0f / beatType) * numBeats * 256;
+    void addRest(NoteType type)
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
         }
+        staves.at(currentStaff).getMeasures().back().addRest(Rest(type));
+    }
 
-        int getBeatUnits() { return this->beatUnits; }
-
-    protected:
-        int numBeats;
-        int beatType;
-        int beatUnits;
-};
-
-
-class Note {
-    public:
-        Note() { }
-
-        Note(NoteName noteName,
-            Accidental accidental,
-            NoteType noteType,
-            float amplitude
-            )
-        {
-            this->freqs.push_back((A4_FREQ * pow(2, (noteName - 57 + accidental - 2) / 12)));
-            this->amplitude = amplitude;
-            this->beatUnits = noteType;
-            this->rest = true;
+    void addDot()
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
         }
+        staves.at(currentStaff).getMeasures().back().addDot();
+    }
 
-        void addChord(NoteName noteName, Accidental accidental) {
-            this->freqs.push_back((A4_FREQ * pow(2, (noteName - 57 + accidental - 2) / 12)));
+    void addDoubleDot()
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
         }
+        staves.at(currentStaff).getMeasures().back().addDoubleDot();
+    }
 
-        void addDot() {
-            if ((beatUnits & (beatUnits - 1)) != 0) {
-                throw std::logic_error("Cannot add dot to dotted note. Try addDoubleDot()");
-            }
-            if (beatUnits < 2) {
-                throw std::logic_error("Note duration too small");
-            }
-            beatUnits += (beatUnits / 2);
+    void setDynamic(Dynamic dynamic)
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
         }
+        staves.at(currentStaff).getMeasures().back().setDynamic(dynamic);
+    }
 
-        void addDoubleDot() {
-            if ((beatUnits & (beatUnits - 1)) != 0) {
-                throw std::logic_error("Cannot add dot to dotted note");
-            }
-            if (beatUnits < 4) {
-                throw std::logic_error("Note duration too small");
-            }
-            beatUnits += (beatUnits / 2 + beatUnits / 4);
+    void setTempo(NoteType type, float BPM, bool dotted = false)
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
         }
+        float typeValue = (dotted) ? (as_int(type) / 2.0f + as_int(type)) : as_int(type);
+        staves.at(currentStaff).getMeasures().back().setBeatUnitsPerSecond((BPM / 60.0f) * (256.0f / typeValue) * 256.0f);
+    }
 
-        std::vector<float> getFreqs() { return this->freqs; }
-        float getAmplitude() { return this->amplitude; }
-        int getBeatUnits() { return this->beatUnits; }
+    void setInitialDynamic(Dynamic dynamic)
+    {
+        this->amplitude = as_int(dynamic) / 100.0f;
+    }
+        
+    void setInitialTempo(NoteType type, float BPM, bool dotted = false)
+    {
+        float typeValue = (dotted) ? (as_int(type) / 2.0f + as_int(type)) : as_int(type);
+        this->beatUnitsPerSecond = (BPM / 60.0f) * (256.0f / typeValue) * 256.0f;
+    }
 
-    protected:
-        std::vector<float> freqs;
-        float amplitude;
-        int beatUnits;
-        bool rest;
-};
+    void setMaxNoteSeparation(float maxNoteSeparation)
+    {
+        this->maxNoteSeparation = maxNoteSeparation;
+    }
 
+    void playScore()
+    {
+        SynthVoice* voice;
+        Staff staff;
+        Measure measure;
+        Note note;
+        float currentTime;
 
-class Rest: public Note {
-    public:
-        Rest(NoteType noteType) {
-            this->beatUnits = noteType;
-            this->rest = true;
-        }
-};
+        for (size_t s = 0; s < staves.size(); ++s) {
+            currentTime = 0.0f;
+            staff = staves.at(s);
+            voice = staff.getInstrument();
 
+            for (size_t i = 0; i < staff.getMeasures().size(); ++i) {
+                measure = staff.getMeasures().at(i);
 
-class Measure {
-    public:
-        Measure() {
-            this->timeSignature = TimeSignature();
-            this->beatUnitsRemaining = 1024;
-        }
-
-        Measure(TimeSignature timeSignature) {
-            this->timeSignature = timeSignature;
-            this->beatUnitsRemaining = timeSignature.getBeatUnits();
-        }
-
-        void addNote(Note note) {
-            if (note.getBeatUnits() > beatUnitsRemaining) {
-                throw std::logic_error("Note length exceeds measure");
-            }
-            notes.push_back(note);
-            beatUnitsRemaining -= note.getBeatUnits();
-        }
-
-        void addChord(NoteName noteName, Accidental accidental) {
-            if (notes.size() < 1) {
-                throw std::logic_error("No existing note to make a chord");
-            }
-            notes.back().addChord(noteName, accidental);
-        }
-
-        void addDot() {
-            if ((notes.back().getBeatUnits() / 2) > beatUnitsRemaining) {
-                throw std::logic_error("Note length exceeds measure");
-            }
-            notes.back().addDot();
-            beatUnitsRemaining -= (notes.back().getBeatUnits() / 2);
-        }
-
-        void addDoubleDot() {
-            if ((notes.back().getBeatUnits() / 2 + notes.back().getBeatUnits() / 4) > beatUnitsRemaining) {
-                throw std::logic_error("Note length exceeds measure");
-            }
-            notes.back().addDoubleDot();
-            beatUnitsRemaining -= (notes.back().getBeatUnits() / 2 + notes.back().getBeatUnits() / 4);
-        }
-
-        void fillRests() {
-
-        }
-
-        TimeSignature getTimeSignature() { return this->timeSignature; }
-        std::vector<Note> getNotes() { return this->notes; }
-
-    protected:
-        TimeSignature timeSignature;
-        int beatUnitsRemaining;
-        std::vector<Note> notes;
-};
-
-
-class Score {
-    public:
-        Score() {
-            this->synthManager = NULL;
-            this->initialBPM = 60.0f;
-            this->maxNoteSeparation = 0.5f;
-        }
-
-        Score(SynthGUIManager<FM>* synthManager) {
-            this->synthManager = synthManager;
-            this->initialBPM = 60.0f;
-            this->maxNoteSeparation = 0.5f;
-        }
-
-        void addMeasure(TimeSignature timeSignature) {
-            measures.push_back(Measure(timeSignature));
-        }
-
-        void setInitialBPM(float initialBPM) {
-            this->initialBPM = initialBPM;
-        }
-
-        void setMaxNoteSeparation(float maxNoteSeparation) {
-            this->maxNoteSeparation = maxNoteSeparation;
-        }
-
-        void playScore() {
-            SynthVoice* voice;
-            Measure measure;
-            Note note;
-            float beatUnitsPerSecond = (initialBPM / 60.0f * 256);
-            float currentTime = 0.0f;
-            for (size_t i = 0; i < measures.size(); ++i) {
-                measure = measures.at(i);
-                std::cout << measure.getNotes().size() << std::endl;
                 for (size_t j = 0; j < measure.getNotes().size(); ++j) {
                     note = measure.getNotes().at(j);
 
-                    voice = synthManager->synth().getVoice<FM>();
-                    voice->setInternalParameterValue("amplitude", note.getAmplitude());
-                    voice->setInternalParameterValue("attackTime", 0.1);
-                    voice->setInternalParameterValue("releaseTime", 0.1);
-                    voice->setInternalParameterValue("pan", -1.0);
-
-
-                    for (size_t k = 0; k < note.getFreqs().size(); ++k) {
-                        voice->setInternalParameterValue("frequency", note.getFreqs().at(k));
-                        synthManager->synthSequencer().addVoiceFromNow(
-                            voice,
-                            currentTime,
-                            note.getBeatUnits() / beatUnitsPerSecond
-                        );
+                    // Update attributes
+                    if (as_int(note.getAttributes().dynamic) > 0) {
+                        amplitude = as_int(note.getAttributes().dynamic) / 100.0f;
                     }
-                    
+                    if (note.getAttributes().beatUnitsPerSecond > 0) {
+                        beatUnitsPerSecond = note.getAttributes().beatUnitsPerSecond;
+                    }
+
+
+                    if (!note.isRest()) {
+                        // Update synthesizer parameters
+                        voice->setInternalParameterValue("amp", amplitude);
+
+                        for (size_t k = 0; k < note.getFreqs().size(); ++k) {
+                            voice->setInternalParameterValue("freq", note.getFreqs().at(k));
+                            sequencer->addVoiceFromNow(
+                                voice,
+                                currentTime,
+                                note.getBeatUnits() / beatUnitsPerSecond
+                            );
+                        }
+                    }
+
                     currentTime += note.getBeatUnits() / beatUnitsPerSecond;
                 }
 
             }
         }
+    }
 
-        Measure getMeasure(int measureNumber) { return this->measures.at(measureNumber); }
+    void registerSynthSequencer(SynthSequencer& seq) { sequencer = &seq; }
 
-    protected:
-        SynthGUIManager<FM>* synthManager;
-        float initialBPM;
-        float maxNoteSeparation;
-        std::vector<Measure> measures;
+    Measure& getMeasure(int measureNumber) { return this->staves.at(currentStaff).getMeasures().at(measureNumber); }
+    Staff& getStaff(std::string name) { return this->staves.at(currentStaff); }
+
+protected:
+    SynthSequencer* sequencer{ nullptr };
+    float amplitude;
+    float beatUnitsPerSecond;
+    float maxNoteSeparation;
+    int currentStaff;
+    std::vector<std::string> staffNames;
+    std::vector<Staff> staves;
 };
 
 
 struct MyApp: public App {
     Score score;
-    SynthGUIManager<FM> synthManager{"FM"};
+    SynthSequencer seq;
+    InstrumentCelesta* celesta;
 
     void onInit() override { // Called on app start
         std::cout << "onInit()" << std::endl;
+        score = Score();
+        score.registerSynthSequencer(seq);
+        celesta = new InstrumentCelesta();
 
-        score = Score(&synthManager);
-        score.addMeasure(TimeSignature(4, 4));
-        score.getMeasure(0).addNote(Note(C4, natural, _quarter, 0.5f));
-        //score.getMeasure(0).addChord(E4, flat);
-        score.getMeasure(0).addNote(Note(G4, natural, _quarter, 0.5f));
+        // ---------------------------------------------------
+        // BEGIN SCORE
+        // ---------------------------------------------------
+
+        score.addStaff(celesta, "CelestaRH");
+        score.addStaff(celesta, "CelestaLH");
+
+        score.setInitialTempo(NoteType::_eighth, 58.0f, true);
+        score.setInitialDynamic(Dynamic::mf);
+
+        score.setStaff("CelestaRH");
+        score.addMeasure(TimeSignature(1, 8));
+        score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
+        score.addMeasure(TimeSignature(3, 8));
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
+        score.addDot();
+        score.addNote(NoteName::G5, Accidental::natural, NoteType::_16th);
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::B5, Accidental::natural, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::A5, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
+        score.addDot();
+        score.addNote(NoteName::G5, Accidental::natural, NoteType::_16th);
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::D5, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::F5, Accidental::natural, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::B4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+
+        score.setStaff("CelestaLH");
+        score.addMeasure(TimeSignature(1, 8));
+        score.addRest(NoteType::_eighth);
+        score.addMeasure(TimeSignature(3, 8));
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::A4, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::B3, Accidental::natural, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::G4, Accidental::natural, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::B4, Accidental::natural, NoteType::_quarter);
+
+        // ---------------------------------------------------
+        // END SCORE
+        // ---------------------------------------------------
     }
 
     void onCreate() override { // Called when graphics context is available
         std::cout << "onCreate()" << std::endl;
         navControl().active(false);
         gam::sampleRate(audioIO().framesPerSecond());
-
         imguiInit();
-
-        synthManager.synthRecorder().verbose(true);
     }
 
     void onAnimate(double dt) override { // Called once before drawing
         imguiBeginFrame();
-        synthManager.drawSynthControlPanel();
+
         imguiEndFrame();
     }
 
     void onDraw(Graphics &g) override { // Draw function
         g.clear();
-        synthManager.render(g);
+        seq.render(g);
         imguiDraw();
     }
 
     void onSound(AudioIOData &io) override { // Audio callback
-        synthManager.render(io);
+        seq.render(io);
     }
 
     void onMessage(osc::Message &m) override { // OSC message callback
@@ -431,12 +321,6 @@ struct MyApp: public App {
             return true;
         }
 
-        int midiNote = asciiToMIDI(k.key());
-        if (midiNote > 0) {
-            synthManager.voice()->setInternalParameterValue("freq", pow(2.f, (midiNote - 69.f) / 12.f) * 432.f);
-            synthManager.triggerOn(midiNote);
-        }
-
         switch (k.key()) {
         case ' ':
             std::cout << "Spacebar pressed!" << std::endl;
@@ -445,22 +329,22 @@ struct MyApp: public App {
         return true;
     }
 
-    bool onKeyUp(Keyboard const& k) override {
-        int midiNote = asciiToMIDI(k.key());
-        if (midiNote > 0) {
-            synthManager.triggerOff(midiNote);
-        }
-        return true;
-    }
+    Score& getScore() { return score; }
 
-    void onExit() override { imguiShutdown(); }
+    void onExit() override
+    {
+        delete celesta;
+        imguiShutdown();
+    }
 };
 
 
 int main() {
     MyApp app;
+    //Score& score = app.getScore();
     app.dimensions(800, 600);
     app.configureAudio(48000., 256, 2, 0);
+
     app.start();
     return 0;
 }
