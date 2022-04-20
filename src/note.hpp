@@ -47,6 +47,7 @@ public:
     Rest() { rest = true; }
     Rest(NoteType type)
     {
+        attributes = NoteAttributes();
         beatUnits = as_int(type);
         rest = true;
     }

@@ -45,7 +45,7 @@ void InstrumentCelesta::onProcess(AudioIOData& io)
     mPan.pos(getInternalParameterValue("pan"));
     while (io())
     {
-        float s1 = mAmpEnv() * (mOsc() * a + mOsc2() * (a / 2.0f) + mOsc4() * (a / 4.0f));
+        float s1 = mAmpEnv() * (mOsc() * (a / 4.0f) + mOsc2() * (a / 2.0f) + mOsc4() * (a / 2.0f));
         float s2;
         mPan(s1, s1, s2);
         io.out(0) += s1;

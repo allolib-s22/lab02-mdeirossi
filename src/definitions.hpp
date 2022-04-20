@@ -57,6 +57,12 @@ enum class Dynamic
     fff = 100
 };
 
+enum class Instrument
+{
+    Celesta,
+    Violins
+};
+
 template <typename Enumeration>
 auto as_int(Enumeration const value) -> typename std::underlying_type<Enumeration>::type
 {

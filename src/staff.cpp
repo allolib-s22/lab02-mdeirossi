@@ -1,7 +1,7 @@
 #include "staff.hpp"
 
 
-Staff::Staff(al::SynthVoice* instrument)
+Staff::Staff(Instrument instrument)
 {
 	this->instrument = instrument;
 }

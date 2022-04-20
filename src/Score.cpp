@@ -31,8 +31,12 @@ public:
         this->currentStaff = -1;
     }
 
-    void addStaff(SynthVoice* instrument, std::string name)
+    void addStaff(Instrument instrument, std::string name)
     {
+        if (std::find(staffNames.begin(), staffNames.end(), name) != staffNames.end()) {
+            std::cerr << "Staff with name " << name << " already exists" << std::endl;
+            throw std::invalid_argument("Staff with name " + name + " already exists");
+        }
         staffNames.push_back(name);
         staves.push_back(Staff(instrument));
         currentStaff = staffNames.size() - 1;
@@ -142,7 +146,7 @@ public:
         this->maxNoteSeparation = maxNoteSeparation;
     }
 
-    void playScore()
+    void loadScore()
     {
         SynthVoice* voice;
         Staff staff;
@@ -153,7 +157,6 @@ public:
         for (size_t s = 0; s < staves.size(); ++s) {
             currentTime = 0.0f;
             staff = staves.at(s);
-            voice = staff.getInstrument();
 
             for (size_t i = 0; i < staff.getMeasures().size(); ++i) {
                 measure = staff.getMeasures().at(i);
@@ -171,12 +174,20 @@ public:
 
 
                     if (!note.isRest()) {
-                        // Update synthesizer parameters
-                        voice->setInternalParameterValue("amp", amplitude);
 
                         for (size_t k = 0; k < note.getFreqs().size(); ++k) {
+                            switch (staff.getInstrument()) {
+                            case Instrument::Celesta:
+                                voice = sequencer->synth().getVoice<InstrumentCelesta>();
+                                break;
+                            default:
+                                std::cerr << "Could not find voice for instrument" << std::endl;
+                                throw std::logic_error("Could not find voice for instrument");
+                            }
                             voice->setInternalParameterValue("freq", note.getFreqs().at(k));
-                            sequencer->addVoiceFromNow(
+                            voice->setInternalParameterValue("amp", amplitude);
+
+                            sequencer->addVoice(
                                 voice,
                                 currentTime,
                                 note.getBeatUnits() / beatUnitsPerSecond
@@ -189,6 +200,12 @@ public:
 
             }
         }
+    }
+
+    void playScore()
+    {
+        loadScore();
+        sequencer->playSequence();
     }
 
     void registerSynthSequencer(SynthSequencer& seq) { sequencer = &seq; }
@@ -204,29 +221,29 @@ protected:
     int currentStaff;
     std::vector<std::string> staffNames;
     std::vector<Staff> staves;
+
+    std::list<SynthSequencerEvent> events;
 };
 
 
 struct MyApp: public App {
     Score score;
     SynthSequencer seq;
-    InstrumentCelesta* celesta;
 
     void onInit() override { // Called on app start
         std::cout << "onInit()" << std::endl;
         score = Score();
         score.registerSynthSequencer(seq);
-        celesta = new InstrumentCelesta();
 
         // ---------------------------------------------------
         // BEGIN SCORE
         // ---------------------------------------------------
 
-        score.addStaff(celesta, "CelestaRH");
-        score.addStaff(celesta, "CelestaLH");
+        score.addStaff(Instrument::Celesta, "CelestaRH");
+        score.addStaff(Instrument::Celesta, "CelestaLH");
 
         score.setInitialTempo(NoteType::_eighth, 58.0f, true);
-        score.setInitialDynamic(Dynamic::mf);
+        score.setInitialDynamic(Dynamic::mp);
 
         score.setStaff("CelestaRH");
         score.addMeasure(TimeSignature(1, 8));
@@ -294,6 +311,8 @@ struct MyApp: public App {
         navControl().active(false);
         gam::sampleRate(audioIO().framesPerSecond());
         imguiInit();
+
+        seq.verbose(true);
     }
 
     void onAnimate(double dt) override { // Called once before drawing
@@ -329,11 +348,8 @@ struct MyApp: public App {
         return true;
     }
 
-    Score& getScore() { return score; }
-
     void onExit() override
     {
-        delete celesta;
         imguiShutdown();
     }
 };
@@ -341,7 +357,6 @@ struct MyApp: public App {
 
 int main() {
     MyApp app;
-    //Score& score = app.getScore();
     app.dimensions(800, 600);
     app.configureAudio(48000., 256, 2, 0);
 
