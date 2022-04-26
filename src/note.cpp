@@ -6,9 +6,13 @@ Note::Note(NoteName name,
     NoteType type
 )
 {
+    this->name = name;
+    this->accidental = accidental;
+    this->type = type;
     this->freqs.push_back((A4_FREQ * pow(2.0f, (as_int(name) - 57.0f + as_int(accidental) - 2.0f) / 12.0f)));
     this->attributes = NoteAttributes();
     this->beatUnits = as_int(type);
+    this->durationModifier = 0;
     this->rest = false;
 }
 
@@ -18,9 +22,13 @@ Note::Note(NoteName name,
     NoteAttributes attributes
 )
 {
+    this->name = name;
+    this->accidental = accidental;
+    this->type = type;
     this->freqs.push_back((A4_FREQ * pow(2.0f, (as_int(name) - 57.0f + as_int(accidental) - 2.0f) / 12.0f)));
     this->attributes = attributes;
     this->beatUnits = as_int(type);
+    this->durationModifier = 0;
     this->rest = false;
 }
 
@@ -31,6 +39,10 @@ void Note::addChord(NoteName name, Accidental accidental)
 
 void Note::addDot()
 {
+    if (durationModifier != 0) {
+        std::cerr << "Dot must be added before other modifiers" << std::endl;
+        throw std::logic_error("Dot must be added before other modifiers");
+    }
     if ((beatUnits & (beatUnits - 1)) != 0) {
         std::cerr << "Cannot add dot to dotted note. Try addDoubleDot()" << std::endl;
         throw std::logic_error("Cannot add dot to dotted note. Try addDoubleDot()");
@@ -44,6 +56,10 @@ void Note::addDot()
 
 void Note::addDoubleDot()
 {
+    if (durationModifier != 0) {
+        std::cerr << "Dot must be added before other modifiers" << std::endl;
+        throw std::logic_error("Dot must be added before other modifiers");
+    }
     if ((beatUnits & (beatUnits - 1)) != 0) {
         std::cerr << "Cannot add dot to dotted note" << std::endl;
         throw std::logic_error("Cannot add dot to dotted note");
@@ -53,4 +69,9 @@ void Note::addDoubleDot()
         throw std::logic_error("Note duration too small");
     }
     beatUnits += (beatUnits / 2 + beatUnits / 4);
+}
+
+void Note::addTiedNote(NoteType type)
+{
+
 }

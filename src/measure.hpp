@@ -15,6 +15,7 @@ public:
     void addChord(NoteName name, Accidental accidental);
     void addDot();
     void addDoubleDot();
+    void addTiedNote(Note note);
     void setDynamic(Dynamic dynamic);
     void setBeatUnitsPerSecond(float beatUnitsPerSecond);
     void fillRests();

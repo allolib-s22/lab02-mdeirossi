@@ -64,6 +64,16 @@ void Measure::addDoubleDot()
     notes.back().addDoubleDot();
 }
 
+void Measure::addTiedNote(Note note)
+{
+    if (note.getBeatUnits() > beatUnitsRemaining) {
+        std::cerr << "Note length exceeds measure" << std::endl;
+        throw std::logic_error("Note length exceeds measure");
+    }
+    beatUnitsRemaining -= note.getBeatUnits();
+    notes.push_back(note);
+}
+
 void Measure::setDynamic(Dynamic dynamic)
 {
     if (notes.size() < 1) {

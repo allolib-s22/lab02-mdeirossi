@@ -111,6 +111,28 @@ public:
         staves.at(currentStaff).getMeasures().back().addDoubleDot();
     }
 
+    void addTiedNote(NoteName name, NoteType type)
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
+        }
+        Note* prevNote;
+        std::vector<Measure>& measures = staves.at(currentStaff).getMeasures();
+        if (measures.back().getNotes().size() < 1) {
+            if (measures.size() < 1) {
+                std::cerr << "No note to tie from" << std::endl;
+                throw std::invalid_argument("No note to tie from");
+            }
+            prevNote = &measures.at(measures.size() - 1).getNotes().back();
+        }
+        else {
+            prevNote = &measures.back().getNotes().back();
+        }
+        
+        measures.back().addTiedNote(Note(prevNote->getNoteName(), prevNote->getAccidental(), type));
+    }
+
     void setDynamic(Dynamic dynamic)
     {
         if (staffNames.size() < 1) {
@@ -273,6 +295,21 @@ struct MyApp: public App {
         score.addMeasure();
         score.addNote(NoteName::B4, Accidental::natural, NoteType::_quarter);
         score.addDot();
+        score.addMeasure();
+        score.addRest(NoteType::_quarter);
+        score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
+        score.addDot();
+        score.addNote(NoteName::G5, Accidental::natural, NoteType::_16th);
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::B5, Accidental::natural, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::D6, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::D6, Accidental::flat, NoteType::_eighth);
+
 
         score.setStaff("CelestaLH");
         score.addMeasure(TimeSignature(1, 8));
@@ -300,6 +337,16 @@ struct MyApp: public App {
         score.addNote(NoteName::G4, Accidental::natural, NoteType::_eighth);
         score.addMeasure();
         score.addNote(NoteName::B4, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::B3, Accidental::natural, NoteType::_eighth);
+        score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
+        score.addMeasure();
+        score.addNote(NoteName::D4, Accidental::natural, NoteType::_quarter);
+        score.addDot();
 
         // ---------------------------------------------------
         // END SCORE
