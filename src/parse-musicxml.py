@@ -50,6 +50,7 @@ def parse_xml(argv):
 
     for part in root.findall('part'):
         result += f"// {id_table[part.get('id')]}-{part.get('id')}\n"
+        result += f"score.setStaff({id_table[part.get('id')]}-{part.get('id')});\n"
 
         for measure in part.findall('measure'):
             result += f"// m{measure.get('number')}\n"

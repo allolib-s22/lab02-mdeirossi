@@ -62,6 +62,12 @@ public:
         beatUnits = as_int(type);
         rest = true;
     }
+    Rest(int beatUnits)
+    {
+        attributes = NoteAttributes();
+        this->beatUnits = beatUnits;
+        rest = true;
+    }
 };
 
 

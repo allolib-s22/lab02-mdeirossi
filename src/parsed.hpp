@@ -36,6 +36,7 @@ score.addStaff(Instrument::StringEnsemble1, "StringEnsemble1-P30");
 // Parts
 // ------------------------------
 // Flute-P1
+score.setStaff(Flute-P1);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.setTempo(NoteType::_quarter, 58.0f, true);
@@ -311,6 +312,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Flute-P2
+score.setStaff(Flute-P2);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -574,6 +576,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Oboe-P3
+score.setStaff(Oboe-P3);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -837,6 +840,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Oboe-P4
+score.setStaff(Oboe-P4);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -1100,6 +1104,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Clarinet-P5
+score.setStaff(Clarinet-P5);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -1363,6 +1368,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Clarinet-P6
+score.setStaff(Clarinet-P6);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -1626,6 +1632,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Bassoon-P7
+score.setStaff(Bassoon-P7);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -1889,6 +1896,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Bassoon-P8
+score.setStaff(Bassoon-P8);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -2152,6 +2160,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // FrenchHorn-P9
+score.setStaff(FrenchHorn-P9);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -2415,6 +2424,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // FrenchHorn-P10
+score.setStaff(FrenchHorn-P10);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -2678,6 +2688,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // FrenchHorn-P11
+score.setStaff(FrenchHorn-P11);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -2941,6 +2952,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // FrenchHorn-P12
+score.setStaff(FrenchHorn-P12);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -3204,6 +3216,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Trumpet-P13
+score.setStaff(Trumpet-P13);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -3467,6 +3480,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Trumpet-P14
+score.setStaff(Trumpet-P14);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -3730,6 +3744,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Trumpet-P15
+score.setStaff(Trumpet-P15);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -3993,6 +4008,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Trombone-P16
+score.setStaff(Trombone-P16);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -4256,6 +4272,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Trombone-P17
+score.setStaff(Trombone-P17);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -4519,6 +4536,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Trombone-P18
+score.setStaff(Trombone-P18);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -4782,6 +4800,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Tuba-P19
+score.setStaff(Tuba-P19);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -5045,6 +5064,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Timpani-P20
+score.setStaff(Timpani-P20);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -5308,6 +5328,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // CrashCymbal1-P21
+score.setStaff(CrashCymbal1-P21);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -5571,6 +5592,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // CrashCymbal1-P22
+score.setStaff(CrashCymbal1-P22);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -5834,6 +5856,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // CrashCymbal1-P23
+score.setStaff(CrashCymbal1-P23);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -6097,6 +6120,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // Harp-P24
+score.setStaff(Harp-P24);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -6447,6 +6471,7 @@ score.fillWithRests();
 score.fillWithRests();
 
 // Celesta-P25
+score.setStaff(Celesta-P25);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
@@ -7218,6 +7243,7 @@ score.fillWithRests();
 score.fillWithRests();
 
 // StringEnsemble1-P26
+score.setStaff(StringEnsemble1-P26);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -7481,6 +7507,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // StringEnsemble1-P27
+score.setStaff(StringEnsemble1-P27);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -7744,6 +7771,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // StringEnsemble1-P28
+score.setStaff(StringEnsemble1-P28);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -8007,6 +8035,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // StringEnsemble1-P29
+score.setStaff(StringEnsemble1-P29);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);
@@ -8270,6 +8299,7 @@ score.addMeasure();
 score.fillWithRests();
 
 // StringEnsemble1-P30
+score.setStaff(StringEnsemble1-P30);
 // m0
 score.addMeasure(TimeSignature(3, 8));
 score.addRest(NoteType::_eighth);

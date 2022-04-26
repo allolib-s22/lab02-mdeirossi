@@ -81,7 +81,24 @@ public:
             std::cerr << "No staves exist" << std::endl;
             throw std::invalid_argument("No staves exist");
         }
+        if (staves.at(currentStaff).getMeasures().size() < 1) {
+            std::cerr << "No measure in staff" << std::endl;
+            throw std::invalid_argument("No measure in staff");
+        }
         staves.at(currentStaff).getMeasures().back().addNote(Note(name, accidental, type));
+    }
+
+    void addChord(NoteName name, Accidental accidental)
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
+        }
+        if (staves.at(currentStaff).getMeasures().size() < 1) {
+            std::cerr << "No measure in staff" << std::endl;
+            throw std::invalid_argument("No measure in staff");
+        }
+        staves.at(currentStaff).getMeasures().back().addChord(name, accidental);
     }
 
     void addRest(NoteType type)
@@ -89,6 +106,10 @@ public:
         if (staffNames.size() < 1) {
             std::cerr << "No staves exist" << std::endl;
             throw std::invalid_argument("No staves exist");
+        }
+        if (staves.at(currentStaff).getMeasures().size() < 1) {
+            std::cerr << "No measure in staff" << std::endl;
+            throw std::invalid_argument("No measure in staff");
         }
         staves.at(currentStaff).getMeasures().back().addRest(Rest(type));
     }
@@ -99,6 +120,10 @@ public:
             std::cerr << "No staves exist" << std::endl;
             throw std::invalid_argument("No staves exist");
         }
+        if (staves.at(currentStaff).getMeasures().size() < 1) {
+            std::cerr << "No measure in staff" << std::endl;
+            throw std::invalid_argument("No measure in staff");
+        }
         staves.at(currentStaff).getMeasures().back().addDot();
     }
 
@@ -108,7 +133,24 @@ public:
             std::cerr << "No staves exist" << std::endl;
             throw std::invalid_argument("No staves exist");
         }
+        if (staves.at(currentStaff).getMeasures().size() < 1) {
+            std::cerr << "No measure in staff" << std::endl;
+            throw std::invalid_argument("No measure in staff");
+        }
         staves.at(currentStaff).getMeasures().back().addDoubleDot();
+    }
+
+    void fillWithRests()
+    {
+        if (staffNames.size() < 1) {
+            std::cerr << "No staves exist" << std::endl;
+            throw std::invalid_argument("No staves exist");
+        }
+        if (staves.at(currentStaff).getMeasures().size() < 1) {
+            std::cerr << "No measure in staff" << std::endl;
+            throw std::invalid_argument("No measure in staff");
+        }
+        staves.at(currentStaff).getMeasures().back().fillWithRests();
     }
 
     void addTiedNote(NoteName name, NoteType type)
@@ -116,6 +158,10 @@ public:
         if (staffNames.size() < 1) {
             std::cerr << "No staves exist" << std::endl;
             throw std::invalid_argument("No staves exist");
+        }
+        if (staves.at(currentStaff).getMeasures().size() < 1) {
+            std::cerr << "No measure in staff" << std::endl;
+            throw std::invalid_argument("No measure in staff");
         }
         Note* prevNote;
         std::vector<Measure>& measures = staves.at(currentStaff).getMeasures();
@@ -136,31 +182,23 @@ public:
     void setDynamic(Dynamic dynamic)
     {
         if (staffNames.size() < 1) {
-            std::cerr << "No staves exist" << std::endl;
-            throw std::invalid_argument("No staves exist");
+            this->amplitude = as_int(dynamic) / 100.0f;
         }
-        staves.at(currentStaff).getMeasures().back().setDynamic(dynamic);
+        else {
+            staves.at(currentStaff).getMeasures().back().setDynamic(dynamic);
+        }
     }
 
     void setTempo(NoteType type, float BPM, bool dotted = false)
     {
+        float typeValue = (dotted) ? (as_int(type) / 2.0f + as_int(type)) : as_int(type);
+        float bps = (BPM / 60.0f) * (256.0f / typeValue) * 256.0f;
         if (staffNames.size() < 1) {
-            std::cerr << "No staves exist" << std::endl;
-            throw std::invalid_argument("No staves exist");
+            this->beatUnitsPerSecond = bps;
         }
-        float typeValue = (dotted) ? (as_int(type) / 2.0f + as_int(type)) : as_int(type);
-        staves.at(currentStaff).getMeasures().back().setBeatUnitsPerSecond((BPM / 60.0f) * (256.0f / typeValue) * 256.0f);
-    }
-
-    void setInitialDynamic(Dynamic dynamic)
-    {
-        this->amplitude = as_int(dynamic) / 100.0f;
-    }
-        
-    void setInitialTempo(NoteType type, float BPM, bool dotted = false)
-    {
-        float typeValue = (dotted) ? (as_int(type) / 2.0f + as_int(type)) : as_int(type);
-        this->beatUnitsPerSecond = (BPM / 60.0f) * (256.0f / typeValue) * 256.0f;
+        else {
+            staves.at(currentStaff).getMeasures().back().setBeatUnitsPerSecond(bps);
+        }
     }
 
     void setMaxNoteSeparation(float maxNoteSeparation)
@@ -257,6 +295,9 @@ struct MyApp: public App {
         score = Score();
         score.registerSynthSequencer(seq);
 
+        //#include "parsed.hpp"
+        //return;
+
         // ---------------------------------------------------
         // BEGIN SCORE
         // ---------------------------------------------------
@@ -264,8 +305,8 @@ struct MyApp: public App {
         score.addStaff(Instrument::Celesta, "CelestaRH");
         score.addStaff(Instrument::Celesta, "CelestaLH");
 
-        score.setInitialTempo(NoteType::_eighth, 58.0f, true);
-        score.setInitialDynamic(Dynamic::mp);
+        score.setTempo(NoteType::_eighth, 58.0f, true);
+        score.setDynamic(Dynamic::mp);
 
         score.setStaff("CelestaRH");
         score.addMeasure(TimeSignature(1, 8));

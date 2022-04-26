@@ -64,6 +64,19 @@ void Measure::addDoubleDot()
     notes.back().addDoubleDot();
 }
 
+void Measure::fillWithRests()
+{
+    int n;
+    while (beatUnitsRemaining > 0) {
+        n = 1;
+        while (n * 2 <= beatUnitsRemaining) {
+            n *= 2;
+        } 
+        beatUnitsRemaining -= n;
+        notes.push_back(Rest(n));
+    }
+}
+
 void Measure::addTiedNote(Note note)
 {
     if (note.getBeatUnits() > beatUnitsRemaining) {
@@ -90,9 +103,4 @@ void Measure::setBeatUnitsPerSecond(float beatUnitsPerSecond)
         throw std::logic_error("No existing note to attach dynamic to");
     }
     notes.back().getAttributes().beatUnitsPerSecond = beatUnitsPerSecond;
-}
-
-void Measure::fillRests()
-{
-
 }
