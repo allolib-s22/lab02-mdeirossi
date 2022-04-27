@@ -50,7 +50,7 @@ def parse_xml(argv):
 
     for part in root.findall('part'):
         result += f"// {id_table[part.get('id')]}-{part.get('id')}\n"
-        result += f"score.setStaff({id_table[part.get('id')]}-{part.get('id')});\n"
+        result += f"score.setStaff(\"{id_table[part.get('id')]}-{part.get('id')}\");\n"
 
         for measure in part.findall('measure'):
             result += f"// m{measure.get('number')}\n"
@@ -89,14 +89,14 @@ def parse_xml(argv):
                     octave = _pitch.find('octave').text
                     note_type = note.find('type').text
 
-                    if _pitch.find('accidental') != None:
-                        accidental = _pitch.find('accidental').text
+                    if note.find('accidental') != None:
+                        accidental = note.find('accidental').text
                         
                     if note.find('chord') != None and chord_notes > 0:
-                        result += f"score.addChord(NoteName::{step}{octave});\n"
+                        result += f"score.addChord(NoteName::{step}{octave}, Accidental::{accidental});\n"
                     else:
                         result += f"score.addNote(NoteName::{step}{octave}, Accidental::{accidental}, NoteType::_{note_type});\n"
-                        chord_notes += 1
+                    chord_notes += 1
 
                 if chord_notes <= 1:
                     dots = note.findall('dot')

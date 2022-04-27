@@ -22,6 +22,7 @@ public:
 
     TimeSignature& getTimeSignature() { return this->timeSignature; }
     std::vector<Note>& getNotes() { return this->notes; }
+    int getBeatUnitsRemaining() { return this->beatUnitsRemaining; }
 
 protected:
     TimeSignature timeSignature;
