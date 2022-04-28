@@ -11,7 +11,8 @@
 #include "al/ui/al_Parameter.hpp"
 
 #include "staff.hpp"
-#include "InstrumentCelesta.hpp"
+#include "instruments/Celesta.hpp"
+#include "instruments/Trumpet.hpp"
 
 #include <cstdio>
 #include <vector>
@@ -222,6 +223,7 @@ public:
         Staff staff;
         Measure measure;
         Note note;
+        float duration;
         float currentTime;
 
         for (size_t s = 0; s < staves.size(); ++s) {
@@ -248,7 +250,10 @@ public:
                         for (size_t k = 0; k < note.getFreqs().size(); ++k) {
                             switch (staff.getInstrument()) {
                             case Instrument::Celesta:
-                                voice = sequencer->synth().getVoice<InstrumentCelesta>();
+                                voice = sequencer->synth().getVoice<Celesta>();
+                                break;
+                            case Instrument::Trumpet:
+                                voice = sequencer->synth().getVoice<Trumpet>();
                                 break;
                             default:
                                 std::cerr << "Could not find voice for instrument" << std::endl;
@@ -256,11 +261,18 @@ public:
                             }
                             voice->setInternalParameterValue("freq", note.getFreqs().at(k));
                             voice->setInternalParameterValue("amp", amplitude);
-
+                            
+                            if (note.isPedalOn()) {
+                                duration = voice->getInternalParameterValue("pedalDuration");
+                            }
+                            else {
+                                duration = note.getBeatUnits() / beatUnitsPerSecond;
+                            }
+                            
                             sequencer->addVoice(
                                 voice,
                                 currentTime,
-                                note.getBeatUnits() / beatUnitsPerSecond
+                                duration
                             );
                         }
                     }
@@ -306,9 +318,9 @@ struct MyApp: public App {
         score.registerSynthSequencer(seq);
 
         // ------------------------------
-// Instrument List
-// ------------------------------
-
+        // Instrument List
+        // ------------------------------
+        score.addStaff(Instrument::Trumpet, "Trumpet-P13");
         score.addStaff(Instrument::Celesta, "Celesta-P25");
         score.addStaff(Instrument::Celesta, "Celesta-P26");
 
@@ -318,6 +330,259 @@ struct MyApp: public App {
         // Parts
         // ------------------------------
 
+        // Trumpet-P13
+        score.setStaff("Trumpet-P13");
+        // m1
+        score.addMeasure(TimeSignature(3, 8));
+        score.fillWithRests();
+        // m2
+        score.addMeasure();
+        score.fillWithRests();
+        // m3
+        score.addMeasure();
+        score.fillWithRests();
+        // m4
+        score.addMeasure();
+        score.fillWithRests();
+        // m5
+        score.addMeasure();
+        score.fillWithRests();
+        // m6
+        score.addMeasure();
+        score.fillWithRests();
+        // m7
+        score.addMeasure();
+        score.fillWithRests();
+        // m8
+        score.addMeasure();
+        score.fillWithRests();
+        // m9
+        score.addMeasure();
+        score.fillWithRests();
+        // m10
+        score.addMeasure();
+        score.fillWithRests();
+        // m11
+        score.addMeasure();
+        score.fillWithRests();
+        // m12
+        score.addMeasure();
+        score.fillWithRests();
+        // m13
+        score.addMeasure();
+        score.fillWithRests();
+        // m14
+        score.addMeasure();
+        score.fillWithRests();
+        // m15
+        score.addMeasure();
+        score.fillWithRests();
+        // m16
+        score.addMeasure();
+        score.fillWithRests();
+        // m17
+        score.addMeasure();
+        score.fillWithRests();
+        // m18
+        score.addMeasure();
+        score.fillWithRests();
+        // m19
+        score.addMeasure();
+        score.fillWithRests();
+        // m20
+        score.addMeasure();
+        score.fillWithRests();
+        // m21
+        score.addMeasure();
+        score.fillWithRests();
+        // m22
+        score.addMeasure();
+        score.fillWithRests();
+        // m23
+        score.addMeasure();
+        score.fillWithRests();
+        // m24
+        score.addMeasure();
+        score.fillWithRests();
+        // m25
+        score.addMeasure();
+        score.fillWithRests();
+        // m26
+        score.addMeasure();
+        score.fillWithRests();
+        // m27
+        score.addMeasure();
+        score.fillWithRests();
+        // m28
+        score.addMeasure();
+        score.fillWithRests();
+        // m29
+        score.addMeasure();
+        score.fillWithRests();
+        // m30
+        score.addMeasure();
+        score.fillWithRests();
+        // m31
+        score.addMeasure();
+        score.fillWithRests();
+        // m32
+        score.addMeasure();
+        score.fillWithRests();
+        // m33
+        score.addMeasure();
+        score.fillWithRests();
+        // m34
+        score.addMeasure();
+        score.fillWithRests();
+        // m35
+        score.addMeasure();
+        score.fillWithRests();
+        // m36
+        score.addMeasure();
+        score.fillWithRests();
+        // m37
+        score.addMeasure();
+        score.fillWithRests();
+        // m38
+        score.addMeasure();
+        score.fillWithRests();
+        // m39
+        score.addMeasure();
+        score.fillWithRests();
+        // m40
+        score.addMeasure();
+        score.fillWithRests();
+        // m41
+        score.addMeasure();
+        score.fillWithRests();
+        // m42
+        score.addMeasure();
+        score.fillWithRests();
+        // m43
+        score.addMeasure();
+        score.fillWithRests();
+        // m44
+        score.addMeasure();
+        score.fillWithRests();
+        // m45
+        score.addMeasure();
+        score.fillWithRests();
+        // m46
+        score.addMeasure();
+        score.fillWithRests();
+        // m47
+        score.addMeasure();
+        score.fillWithRests();
+        // m48
+        score.addMeasure();
+        score.fillWithRests();
+        // m49
+        score.addMeasure();
+        score.fillWithRests();
+        // m50
+        score.addMeasure();
+        score.fillWithRests();
+        // m51
+        score.addMeasure();
+        score.fillWithRests();
+        // m52
+        score.addMeasure();
+        score.fillWithRests();
+        // m53
+        score.addMeasure();
+        score.fillWithRests();
+        // m54
+        score.addMeasure();
+        score.fillWithRests();
+        // m55
+        score.addMeasure();
+        score.fillWithRests();
+        // m56
+        score.addMeasure();
+        score.fillWithRests();
+        // m57
+        score.addMeasure();
+        score.fillWithRests();
+        // m58
+        score.addMeasure();
+        score.fillWithRests();
+        // m59
+        score.addMeasure();
+        score.addRest(NoteType::_eighth);
+        score.addRest(NoteType::_eighth);
+        score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
+        // m60
+        score.addMeasure();
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
+        // m61
+        score.addMeasure();
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
+        // m62
+        score.addMeasure();
+        score.addNote(NoteName::D5, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_eighth);
+        // m63
+        score.addMeasure();
+        score.addNote(NoteName::B4, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::G4, Accidental::sharp, NoteType::_eighth);
+        // m64
+        score.addMeasure();
+        score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
+        score.addDot();
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_16th);
+        score.addNote(NoteName::B4, Accidental::sharp, NoteType::_eighth);
+        // m65
+        score.addMeasure();
+        score.addNote(NoteName::B3, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::D4, Accidental::natural, NoteType::_eighth);
+        // m66
+        score.addMeasure();
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_quarter);
+        score.addDot();
+        // m67
+        score.addMeasure();
+        score.addNote(NoteName::C5, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
+        // m68
+        score.addMeasure();
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
+        // m69
+        score.addMeasure();
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
+        // m70
+        score.addMeasure();
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::E5, Accidental::flat, NoteType::_eighth);
+        // m71
+        score.addMeasure();
+        score.addNote(NoteName::D5, Accidental::natural, NoteType::_quarter);
+        score.addNote(NoteName::B4, Accidental::flat, NoteType::_eighth);
+        // m72
+        score.addMeasure();
+        score.addNote(NoteName::D5, Accidental::natural, NoteType::_eighth);
+        score.addDot();
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_16th);
+        score.addNote(NoteName::B4, Accidental::sharp, NoteType::_eighth);
+        // m73
+        score.addMeasure();
+        score.addNote(NoteName::B3, Accidental::sharp, NoteType::_quarter);
+        score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
+        // m74
+        score.addMeasure();
+        score.addNote(NoteName::F4, Accidental::sharp, NoteType::_quarter);
+        score.addDot();
+        // m75
+        score.addMeasure();
+        score.addNote(NoteName::F4, Accidental::natural, NoteType::_eighth);
+        score.addRest(NoteType::_eighth);
+        score.addRest(NoteType::_eighth);
+        // m76
+        score.addMeasure();
+        score.fillWithRests();
 
         // Celesta-P25
         score.setStaff("Celesta-P25");
@@ -535,7 +800,7 @@ struct MyApp: public App {
         score.addNote(NoteName::E4, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::F4, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::E4, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::F4, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::F4, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::B4, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::C5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::B4, Accidental::natural, NoteType::_32nd);
@@ -557,7 +822,7 @@ struct MyApp: public App {
         score.addNote(NoteName::B5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::A5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::F5, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_32nd);
         // m42
         score.addMeasure();
         score.addNote(NoteName::C6, Accidental::natural, NoteType::_32nd);
@@ -595,7 +860,7 @@ struct MyApp: public App {
         score.addNote(NoteName::B4, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::A4, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::G4, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::F4, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::F4, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::C5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::B4, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::A4, Accidental::natural, NoteType::_32nd);
@@ -623,7 +888,7 @@ struct MyApp: public App {
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::A5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::F5, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::E5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::D5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::C5, Accidental::natural, NoteType::_32nd);
@@ -725,12 +990,12 @@ struct MyApp: public App {
         score.addNote(NoteName::D5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::B4, Accidental::flat, NoteType::_32nd);
         score.addNote(NoteName::G4, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::B4, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::B4, Accidental::flat, NoteType::_32nd);
         score.addNote(NoteName::D5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::F5, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::A5, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::B5, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::B5, Accidental::flat, NoteType::_32nd);
         // m55
         score.addMeasure();
         score.addNote(NoteName::C6, Accidental::natural, NoteType::_32nd);
@@ -739,12 +1004,12 @@ struct MyApp: public App {
         score.addNote(NoteName::C5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::A4, Accidental::flat, NoteType::_32nd);
         score.addNote(NoteName::F4, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::A4, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::A4, Accidental::flat, NoteType::_32nd);
         score.addNote(NoteName::C5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::E5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::F5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::A5, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::A5, Accidental::flat, NoteType::_32nd);
         // m56
         score.addMeasure();
         score.addNote(NoteName::C6, Accidental::natural, NoteType::_32nd);
@@ -767,7 +1032,7 @@ struct MyApp: public App {
         score.addNote(NoteName::A5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::B5, Accidental::flat, NoteType::_32nd);
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::F5, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::E5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::D5, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::C5, Accidental::natural, NoteType::_32nd);
@@ -786,7 +1051,7 @@ struct MyApp: public App {
         score.addNote(NoteName::C6, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::D6, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::C6, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::B5, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::B5, Accidental::flat, NoteType::_32nd);
         // m59
         score.addMeasure();
         score.addNote(NoteName::A5, Accidental::natural, NoteType::_32nd);
@@ -798,39 +1063,73 @@ struct MyApp: public App {
         score.addNote(NoteName::B5, Accidental::flat, NoteType::_32nd);
         score.addNote(NoteName::A5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::F5, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::E5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::D5, Accidental::sharp, NoteType::_32nd);
         // m60
         score.addMeasure();
         score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::G5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::B5, Accidental::natural, NoteType::_eighth);
+        score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::E5, Accidental::natural);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addChord(NoteName::B5, Accidental::natural);
         // m61
         score.addMeasure();
+        score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::E5, Accidental::natural);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addChord(NoteName::B5, Accidental::natural);
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::B5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::E6, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::B5, Accidental::natural);
+        score.addChord(NoteName::E6, Accidental::natural);
         // m62
         score.addMeasure();
-        score.addNote(NoteName::G6, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::E6, Accidental::natural, NoteType::_eighth);
         score.addNote(NoteName::B5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::E6, Accidental::natural);
+        score.addChord(NoteName::G6, Accidental::natural);
+        score.addNote(NoteName::G5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::B5, Accidental::natural);
+        score.addChord(NoteName::E6, Accidental::natural);
+        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addChord(NoteName::B5, Accidental::natural);
         // m63
         score.addMeasure();
-        score.addNote(NoteName::C6, Accidental::sharp, NoteType::_eighth);
-        score.addNote(NoteName::A5, Accidental::sharp, NoteType::_eighth);
         score.addNote(NoteName::F5, Accidental::sharp, NoteType::_eighth);
+        score.addChord(NoteName::A5, Accidental::sharp);
+        score.addChord(NoteName::C6, Accidental::sharp);
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_eighth);
+        score.addChord(NoteName::F5, Accidental::sharp);
+        score.addChord(NoteName::A5, Accidental::sharp);
+        score.addNote(NoteName::A4, Accidental::sharp, NoteType::_eighth);
+        score.addChord(NoteName::C5, Accidental::sharp);
+        score.addChord(NoteName::F5, Accidental::sharp);
         // m64
         score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::G4, Accidental::natural);
+        score.addChord(NoteName::B4, Accidental::natural);
         score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::G5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::E5, Accidental::natural);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addNote(NoteName::G4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::B4, Accidental::natural);
+        score.addChord(NoteName::E5, Accidental::natural);
         // m65
         score.addMeasure();
-        score.addNote(NoteName::A4, Accidental::sharp, NoteType::_eighth);
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::F4, Accidental::sharp);
+        score.addChord(NoteName::A4, Accidental::sharp);
+        score.addNote(NoteName::G4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::C5, Accidental::natural);
+        score.addChord(NoteName::E5, Accidental::natural);
         score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::B5, Accidental::flat, NoteType::_eighth);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addChord(NoteName::B5, Accidental::flat);
         // m66
         score.addMeasure();
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
@@ -841,7 +1140,7 @@ struct MyApp: public App {
         score.addNote(NoteName::B5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::A5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::G5, Accidental::natural, NoteType::_32nd);
-        score.addNote(NoteName::F5, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::E5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::D5, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::C5, Accidental::natural, NoteType::_32nd);
@@ -861,24 +1160,48 @@ struct MyApp: public App {
         score.addNote(NoteName::F4, Accidental::sharp, NoteType::_32nd);
         // m68
         score.addMeasure();
-        score.addNote(NoteName::G4, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::A4, Accidental::sharp, NoteType::_eighth);
+        score.addNote(NoteName::B3, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::E4, Accidental::natural);
+        score.addChord(NoteName::G4, Accidental::natural);
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::G4, Accidental::natural);
+        score.addChord(NoteName::B4, Accidental::natural);
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::F4, Accidental::sharp);
+        score.addChord(NoteName::A4, Accidental::sharp);
         // m69
         score.addMeasure();
+        score.addNote(NoteName::E4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::G4, Accidental::natural);
+        score.addChord(NoteName::B4, Accidental::natural);
         score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::G5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::E5, Accidental::natural);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addNote(NoteName::G4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::B4, Accidental::natural);
+        score.addChord(NoteName::E5, Accidental::natural);
         // m70
         score.addMeasure();
-        score.addNote(NoteName::B5, Accidental::flat, NoteType::_eighth);
         score.addNote(NoteName::D5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::A5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::G5, Accidental::natural);
+        score.addChord(NoteName::B5, Accidental::flat);
+        score.addNote(NoteName::G4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::B4, Accidental::flat);
+        score.addChord(NoteName::D5, Accidental::natural);
+        score.addNote(NoteName::C5, Accidental::sharp, NoteType::_eighth);
+        score.addChord(NoteName::F5, Accidental::sharp);
+        score.addChord(NoteName::A5, Accidental::natural);
         // m71
         score.addMeasure();
-        score.addNote(NoteName::A5, Accidental::flat, NoteType::_eighth);
         score.addNote(NoteName::C5, Accidental::natural, NoteType::_eighth);
-        score.addNote(NoteName::F5, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::F5, Accidental::natural);
+        score.addChord(NoteName::A5, Accidental::flat);
+        score.addNote(NoteName::F4, Accidental::natural, NoteType::_eighth);
+        score.addChord(NoteName::A4, Accidental::flat);
+        score.addChord(NoteName::C5, Accidental::natural);
+        score.addNote(NoteName::A4, Accidental::flat, NoteType::_eighth);
+        score.addChord(NoteName::C5, Accidental::natural);
+        score.addChord(NoteName::F5, Accidental::natural);
         // m72
         score.addMeasure();
         score.addNote(NoteName::A4, Accidental::natural, NoteType::_eighth);
@@ -899,10 +1222,10 @@ struct MyApp: public App {
         score.addNote(NoteName::C4, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::D4, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::D4, Accidental::sharp, NoteType::_32nd);
-        score.addNote(NoteName::D4, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::D4, Accidental::sharp, NoteType::_32nd);
         score.addNote(NoteName::E4, Accidental::natural, NoteType::_32nd);
         score.addNote(NoteName::E4, Accidental::sharp, NoteType::_32nd);
-        score.addNote(NoteName::F4, Accidental::natural, NoteType::_32nd);
+        score.addNote(NoteName::F4, Accidental::sharp, NoteType::_32nd);
         // m74
         score.addMeasure();
         score.addNote(NoteName::G4, Accidental::natural, NoteType::_32nd);
@@ -1221,100 +1544,6 @@ struct MyApp: public App {
 
         return;
 
-        // ---------------------------------------------------
-        // BEGIN SCORE
-        // ---------------------------------------------------
-
-        score.addStaff(Instrument::Celesta, "CelestaRH");
-        score.addStaff(Instrument::Celesta, "CelestaLH");
-
-        score.setTempo(NoteType::_eighth, 58.0f, true);
-        score.setDynamic(Dynamic::mp);
-
-        score.setStaff("CelestaRH");
-        score.addMeasure(TimeSignature(1, 8));
-        score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
-        score.addMeasure(TimeSignature(3, 8));
-        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
-        score.addDot();
-        score.addNote(NoteName::G5, Accidental::natural, NoteType::_16th);
-        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::E5, Accidental::natural, NoteType::_quarter);
-        score.addNote(NoteName::B5, Accidental::natural, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::A5, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
-        score.addDot();
-        score.addNote(NoteName::G5, Accidental::natural, NoteType::_16th);
-        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::D5, Accidental::sharp, NoteType::_quarter);
-        score.addNote(NoteName::F5, Accidental::natural, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::B4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addRest(NoteType::_quarter);
-        score.addNote(NoteName::B4, Accidental::natural, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::E5, Accidental::natural, NoteType::_eighth);
-        score.addDot();
-        score.addNote(NoteName::G5, Accidental::natural, NoteType::_16th);
-        score.addNote(NoteName::F5, Accidental::sharp, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::E5, Accidental::natural, NoteType::_quarter);
-        score.addNote(NoteName::B5, Accidental::natural, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::D6, Accidental::natural, NoteType::_quarter);
-        score.addNote(NoteName::D6, Accidental::flat, NoteType::_eighth);
-
-
-        score.setStaff("CelestaLH");
-        score.addMeasure(TimeSignature(1, 8));
-        score.addRest(NoteType::_eighth);
-        score.addMeasure(TimeSignature(3, 8));
-        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::A4, Accidental::sharp, NoteType::_quarter);
-        score.addNote(NoteName::B3, Accidental::natural, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
-        score.addNote(NoteName::G4, Accidental::natural, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::B4, Accidental::natural, NoteType::_quarter);
-        score.addNote(NoteName::B3, Accidental::natural, NoteType::_eighth);
-        score.addMeasure();
-        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::E4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-        score.addMeasure();
-        score.addNote(NoteName::D4, Accidental::natural, NoteType::_quarter);
-        score.addDot();
-
-        // ---------------------------------------------------
-        // END SCORE
-        // ---------------------------------------------------
     }
 
     void onCreate() override { // Called when graphics context is available

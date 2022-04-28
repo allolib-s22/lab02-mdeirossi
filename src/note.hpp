@@ -39,6 +39,7 @@ public:
     NoteAttributes& getAttributes() { return this->attributes; }
     int getBeatUnits() { return this->beatUnits; }
     bool isRest() { return this->rest; }
+    bool isPedalOn() { return this->pedalOn; }
 
 protected:
     NoteName name;
@@ -49,6 +50,7 @@ protected:
     int beatUnits;
     int durationModifier;
     bool rest;
+    bool pedalOn;
 };
 
 

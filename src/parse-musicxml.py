@@ -2,6 +2,11 @@
 import xml.etree.ElementTree as ET
 
 
+# Supports only one staff per instrument. For multiple staves, add another instrument
+# Does not support pickup measures, use a full measure with rests instead
+
+DEFAULT_ACCIDENTALS = {i: "natural" for i in ["A", "B", "C", "D", "E", "F", "G"]}
+
 def parse_xml(argv):
     if len(argv) != 1:
         print('Usage: parse-musicxml.py <inputfile>')
@@ -63,48 +68,52 @@ def parse_xml(argv):
             else:
                 result += f"score.addMeasure();\n"
             
-            _dir = measure.find('direction')
-            if _dir != None:
-                directions = _dir.findall('direction-type')
-                for direction in directions:
-                    if direction.find('metronome') != None:
-                        beat_type = direction.find('metronome').find('beat-unit').text
-                        has_dot = str(direction.find('metronome').find('beat-unit-dot') != None).lower()
-                        bpm = direction.find('metronome').find('per-minute').text
-                        result += f"score.setTempo(NoteType::_{beat_type}, {float(bpm)}f, {has_dot});\n"
-
             chord_notes = 0
-            for note in measure.findall('note'):
-                accidental = "natural"
+            accs = {}
+            for t in measure:
+                if t.tag == 'note':
+                    if t.find('rest') != None:
+                        if t.find('rest').get('measure') == "yes":
+                            result += "score.fillWithRests();\n"
+                        else:
+                            result += f"score.addRest(NoteType::_{t.find('type').text});\n"
 
-                if note.find('rest') != None:
-                    if note.find('rest').get('measure') == "yes":
-                        result += "score.fillWithRests();\n"
                     else:
-                        result += f"score.addRest(NoteType::_{note.find('type').text});\n"
+                        _pitch = t.find('pitch')
+                        step = _pitch.find('step').text
+                        accidental = "natural"
+                        octave = _pitch.find('octave').text
+                        note_type = t.find('type').text
 
-                else:
-                    _pitch = note.find('pitch')
-                    step = _pitch.find('step').text
-                    octave = _pitch.find('octave').text
-                    note_type = note.find('type').text
-
-                    if note.find('accidental') != None:
-                        accidental = note.find('accidental').text
+                        if t.find('accidental') != None:
+                            accs[step + octave] = t.find('accidental').text
+                        accidental = accs.get(step + octave, "natural")
                         
-                    if note.find('chord') != None and chord_notes > 0:
-                        result += f"score.addChord(NoteName::{step}{octave}, Accidental::{accidental});\n"
-                    else:
-                        result += f"score.addNote(NoteName::{step}{octave}, Accidental::{accidental}, NoteType::_{note_type});\n"
-                    chord_notes += 1
+                        if t.find('chord') != None and chord_notes > 0:
+                            result += f"score.addChord(NoteName::{step}{octave}, Accidental::{accidental});\n"
+                        else:
+                            result += f"score.addNote(NoteName::{step}{octave}, Accidental::{accidental}, NoteType::_{note_type});\n"
+                        chord_notes += 1
 
-                if chord_notes <= 1:
-                    dots = note.findall('dot')
-                    if len(dots) == 2:
-                        result += "score.addDoubleDot();\n"
-                    elif len(dots) == 1:
-                        result += "score.addDot();\n"
-                    
+                    if chord_notes <= 1:
+                        dots = t.findall('dot')
+                        if len(dots) == 2:
+                            result += "score.addDoubleDot();\n"
+                        elif len(dots) == 1:
+                            result += "score.addDot();\n"
+                
+                elif t.tag == 'direction':
+                    directions = t.findall('direction-type')
+                    for direction in directions:
+                        if direction.find('metronome') != None:
+                            beat_type = direction.find('metronome').find('beat-unit').text
+                            has_dot = str(direction.find('metronome').find('beat-unit-dot') != None).lower()
+                            bpm = direction.find('metronome').find('per-minute').text
+                            result += f"score.setTempo(NoteType::_{beat_type}, {float(bpm)}f, {has_dot});\n"
+
+                        if direction.find('dynamics') != None:
+                            dynamic = direction.find('dynamics')[0].tag
+                            result += f"score.setDynamic(Dynamic::{dynamic});\n"
 
         result += "\n"
 

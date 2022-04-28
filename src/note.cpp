@@ -14,6 +14,7 @@ Note::Note(NoteName name,
     this->beatUnits = as_int(type);
     this->durationModifier = 0;
     this->rest = false;
+    this->pedalOn = false;
 }
 
 Note::Note(NoteName name,
@@ -30,6 +31,7 @@ Note::Note(NoteName name,
     this->beatUnits = as_int(type);
     this->durationModifier = 0;
     this->rest = false;
+    this->pedalOn = false;
 }
 
 void Note::addChord(NoteName name, Accidental accidental)
