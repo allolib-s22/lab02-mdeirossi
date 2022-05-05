@@ -1,4 +1,4 @@
-#include "note.hpp"
+#include "Note.hpp"
 
 
 Note::Note(NoteName name,

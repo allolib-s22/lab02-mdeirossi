@@ -53,6 +53,7 @@ enum class Dynamic
     mp = 40,
     mf = 50,
     f = 60,
+    sfz = 70,
     ff = 80,
     fff = 100
 };

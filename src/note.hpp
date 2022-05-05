@@ -5,7 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "definitions.hpp"
+#include "Definitions.hpp"
 
 
 struct NoteAttributes

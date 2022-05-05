@@ -1,4 +1,4 @@
-#include "measure.hpp"
+#include "Measure.hpp"
 
 
 Measure::Measure()

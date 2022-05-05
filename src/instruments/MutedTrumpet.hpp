@@ -35,8 +35,8 @@ public:
         mBWEnv.curve(0);
         mOsc.harmonics(17);
 
-        createInternalTriggerParameter("amplitude", 0.2, 0.0, 1.0);
-        createInternalTriggerParameter("frequency", 60, 20, 5000);
+        createInternalTriggerParameter("amp", 0.2, 0.0, 1.0);
+        createInternalTriggerParameter("freq", 60, 20, 5000);
         createInternalTriggerParameter("attackTime", 0.03, 0.01, 3.0);
         createInternalTriggerParameter("releaseTime", 0.1, 0.1, 10.0);
         createInternalTriggerParameter("sustain", 0.7, 0.0, 1.0);
@@ -55,7 +55,7 @@ public:
 
     virtual void onProcess(AudioIOData& io) override {
         updateFromParameters();
-        float amp = getInternalParameterValue("amplitude");
+        float amp = getInternalParameterValue("amp");
         float noiseMix = getInternalParameterValue("noise");
         while (io()) {
             // mix oscillator with noise
@@ -92,7 +92,7 @@ public:
     }
 
     void updateFromParameters() {
-        mOsc.freq(getInternalParameterValue("frequency"));
+        mOsc.freq(getInternalParameterValue("freq"));
         mOsc.harmonics(getInternalParameterValue("hmnum"));
         mOsc.ampRatio(getInternalParameterValue("hmamp"));
         mAmpEnv.attack(getInternalParameterValue("attackTime"));

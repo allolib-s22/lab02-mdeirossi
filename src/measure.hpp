@@ -1,8 +1,8 @@
 #ifndef MEASURE_HPP
 #define MEASURE_HPP
 
-#include "timeSignature.hpp"
-#include "note.hpp"
+#include "TimeSignature.hpp"
+#include "Note.hpp"
 
 
 class Measure

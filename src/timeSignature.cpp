@@ -1,4 +1,4 @@
-#include "timeSignature.hpp"
+#include "TimeSignature.hpp"
 
 
 TimeSignature::TimeSignature()

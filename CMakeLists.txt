@@ -4,9 +4,11 @@ project(Allotemplate)
 
 # name of application. replace 'app' with desired app name
 set(APP_NAME app)
+set(extra_files "src/Score.hpp" "src/Staff.hpp" "src/Measure.hpp" "src/Note.hpp" "src/TimeSignature.hpp" "src/Definitions.hpp" "src/instruments/Celesta.hpp" "src/instruments/Trumpet.hpp" "src/instruments/MutedTrumpet.hpp")
 
 # path to main source file
-add_executable(${APP_NAME} src/Score.cpp "src/timeSignature.hpp" "src/note.cpp" "src/timeSignature.cpp" "src/definitions.hpp"  "src/measure.hpp" "src/measure.cpp" "src/staff.hpp" "src/staff.cpp" "src/instruments/MutedTrumpet.hpp" "src/instruments/Trumpet.hpp")
+add_executable(${APP_NAME} src/main.cpp)
+target_sources(${APP_NAME} PRIVATE ${extra_files})
 
 # add allolib as a subdirectory to the project
 add_subdirectory(allolib)

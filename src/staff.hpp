@@ -1,8 +1,7 @@
 #ifndef STAFF_HPP
 #define STAFF_HPP
 
-#include "al/scene/al_PolySynth.hpp"
-#include "measure.hpp"
+#include "Measure.hpp"
 
 
 class Staff

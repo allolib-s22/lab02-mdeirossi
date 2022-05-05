@@ -15,7 +15,6 @@ public:
     gam::Pan<> mPan;
     gam::Sine<> mOsc;
     gam::Sine<> mOsc2;
-    gam::Sine<> mOsc4;
     gam::Env<4> mAmpEnv;
 
     void init() override
@@ -27,11 +26,11 @@ public:
         createInternalTriggerParameter("amp", 0.3, 0.0, 1.0);
         createInternalTriggerParameter("freq", 60, 20, 5000);
         createInternalTriggerParameter("pan", 0.0, -1.0, 1.0);
-        createInternalTriggerParameter("pedalDuration", 2.0, 0.1, 5.0);
+        createInternalTriggerParameter("pedalDuration", 3.0, 0.1, 5.0);
 
         mAmpEnv.lengths()[0] = 0.01; // attack
         mAmpEnv.lengths()[1] = 0.02; // decay
-        mAmpEnv.lengths()[2] = 1.0; // sustain decay
+        mAmpEnv.lengths()[2] = 2.0; // sustain decay
         mAmpEnv.lengths()[3] = 1.0; // release
     }
 
@@ -40,14 +39,13 @@ public:
         float f = getInternalParameterValue("freq");
         mOsc.freq(f);
         mOsc2.freq(f * 2);
-        mOsc4.freq(f * 4);
 
         float a = getInternalParameterValue("amp");
 
         mPan.pos(getInternalParameterValue("pan"));
         while (io())
         {
-            float s1 = mAmpEnv() * (mOsc() * (a / 4.0f) + mOsc2() * (a / 2.0f) + mOsc4() * (a / 2.0f));
+            float s1 = mAmpEnv() * (mOsc() * (a / 4.0f) + mOsc2() * (a / 2.0f));
             float s2;
             mPan(s1, s1, s2);
             io.out(0) += s1;

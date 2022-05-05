@@ -1,4 +1,4 @@
-#include "staff.hpp"
+#include "Staff.hpp"
 
 
 Staff::Staff(Instrument instrument)
