@@ -1,10 +1,17 @@
 #include "Note.hpp"
 
 
-Note::Note(NoteName name,
-    Accidental accidental,
-    NoteType type
-)
+Note::Note()
+{
+    this->attributes = NoteAttributes();
+    this->beatUnits = 0;
+    this->durationModifier = 1;
+    this->rest = false;
+    this->pedalOn = false;
+    this->ignore = false;
+}
+
+Note::Note(NoteName name, Accidental accidental, NoteType type)
 {
     this->name = name;
     this->accidental = accidental;
@@ -12,16 +19,13 @@ Note::Note(NoteName name,
     this->freqs.push_back((A4_FREQ * pow(2.0f, (as_int(name) - 57.0f + as_int(accidental) - 2.0f) / 12.0f)));
     this->attributes = NoteAttributes();
     this->beatUnits = as_int(type);
-    this->durationModifier = 0;
+    this->durationModifier = 1;
     this->rest = false;
     this->pedalOn = false;
+    this->ignore = false;
 }
 
-Note::Note(NoteName name,
-    Accidental accidental,
-    NoteType type,
-    NoteAttributes attributes
-)
+Note::Note(NoteName name, Accidental accidental, NoteType type, NoteAttributes attributes)
 {
     this->name = name;
     this->accidental = accidental;
@@ -29,9 +33,10 @@ Note::Note(NoteName name,
     this->freqs.push_back((A4_FREQ * pow(2.0f, (as_int(name) - 57.0f + as_int(accidental) - 2.0f) / 12.0f)));
     this->attributes = attributes;
     this->beatUnits = as_int(type);
-    this->durationModifier = 0;
+    this->durationModifier = 1;
     this->rest = false;
     this->pedalOn = false;
+    this->ignore = false;
 }
 
 void Note::addChord(NoteName name, Accidental accidental)
@@ -41,10 +46,6 @@ void Note::addChord(NoteName name, Accidental accidental)
 
 void Note::addDot()
 {
-    if (durationModifier != 0) {
-        std::cerr << "Dot must be added before other modifiers" << std::endl;
-        throw std::logic_error("Dot must be added before other modifiers");
-    }
     if ((beatUnits & (beatUnits - 1)) != 0) {
         std::cerr << "Cannot add dot to dotted note. Try addDoubleDot()" << std::endl;
         throw std::logic_error("Cannot add dot to dotted note. Try addDoubleDot()");
@@ -58,10 +59,6 @@ void Note::addDot()
 
 void Note::addDoubleDot()
 {
-    if (durationModifier != 0) {
-        std::cerr << "Dot must be added before other modifiers" << std::endl;
-        throw std::logic_error("Dot must be added before other modifiers");
-    }
     if ((beatUnits & (beatUnits - 1)) != 0) {
         std::cerr << "Cannot add dot to dotted note" << std::endl;
         throw std::logic_error("Cannot add dot to dotted note");

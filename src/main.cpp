@@ -1,7 +1,7 @@
 #include "al/app/al_App.hpp"
 
 #include "Score.hpp"
-//#include "parsed.hpp"
+#include "parsed.hpp"
 
 
 struct MyApp : public al::App {
@@ -12,7 +12,7 @@ struct MyApp : public al::App {
         std::cout << "onInit()" << std::endl;
         score = Score();
         score.registerSynthSequencer(seq);
-        //loadFromXML(score);
+        loadFromXML(score);
     }
 
     void onCreate() override { // Called when graphics context is available

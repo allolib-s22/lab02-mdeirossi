@@ -4,7 +4,8 @@ project(Allotemplate)
 
 # name of application. replace 'app' with desired app name
 set(APP_NAME app)
-set(extra_files "src/Score.hpp" "src/Staff.hpp" "src/Measure.hpp" "src/Note.hpp" "src/TimeSignature.hpp" "src/Definitions.hpp" "src/instruments/Celesta.hpp" "src/instruments/Trumpet.hpp" "src/instruments/MutedTrumpet.hpp")
+set(extra_files "src/Score.cpp" "src/Staff.cpp" "src/Measure.cpp" "src/Note.cpp" "src/TimeSignature.cpp" "src/Definitions.hpp" "src/instruments/Celesta.hpp" "src/instruments/Trumpet.hpp" "src/instruments/MutedTrumpet.hpp" "src/instruments/Trombone.hpp" "src/instruments/Tuba.hpp" "src/instruments/FrenchHorn.hpp")
+
 
 # path to main source file
 add_executable(${APP_NAME} src/main.cpp)

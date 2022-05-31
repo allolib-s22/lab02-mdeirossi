@@ -55,7 +55,8 @@ enum class Dynamic
     f = 60,
     sfz = 70,
     ff = 80,
-    fff = 100
+    fff = 100,
+    sffz = 100
 };
 
 enum class Instrument

@@ -9,6 +9,9 @@
 #include "instruments/Celesta.hpp"
 #include "instruments/Trumpet.hpp"
 #include "instruments/MutedTrumpet.hpp"
+#include "instruments/FrenchHorn.hpp"
+#include "instruments/Trombone.hpp"
+#include "instruments/Tuba.hpp"
 
 #include <cstdio>
 #include <vector>
@@ -43,12 +46,17 @@ public:
     void setMaxNoteSeparation(float maxNoteSeparation);
     
     void loadScore();
+    float loadNote(Note& note, Instrument instrument, float currentTime);
     void playScore();
 
     void registerSynthSequencer(SynthSequencer& seq) { sequencer = &seq; }
     Staff& getStaff(std::string name) { return *(this->currentStaff); }
 
 protected:
+    void checkStaffExists();
+    void checkMeasureExists();
+    SynthVoice* getVoice(Instrument instrument);
+
     SynthSequencer* sequencer{ nullptr };
     float amplitude;
     float beatUnitsPerSecond;

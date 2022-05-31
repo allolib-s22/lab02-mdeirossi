@@ -104,9 +104,14 @@ void loadFromXML(Score& score) {
             chord_notes = 0
             accs = {}
             tied_notes = []
+            dynamic = ""
             for t in measure:
                 if t.tag == 'note':
-                    note_type = t.find('type').text
+                    if t.find('rest') != None:
+                        if t.find('rest').get('measure') != "yes":
+                            note_type = t.find('type').text
+                    else:
+                        note_type = t.find('type').text
 
                     # TUPLET VALUES
                     tuplet_num = 0
@@ -204,6 +209,11 @@ void loadFromXML(Score& score) {
                                 result += "score.addDot();\n"
 
                         tied_notes.append({"step": step, "octave": octave, "accidental": accidental})
+
+                    # ADD DYNAMIC AFTER NOTE
+                    if dynamic != "":
+                        result += f"score.setDynamic(Dynamic::{dynamic});\n"
+                        dynamic = ""
                 
                 # TEXT DIRECTIONS
                 elif t.tag == 'direction':
@@ -220,7 +230,6 @@ void loadFromXML(Score& score) {
                         # DYNAMICS
                         if direction.find('dynamics') != None:
                             dynamic = direction.find('dynamics')[0].tag
-                            result += f"score.setDynamic(Dynamic::{dynamic});\n"
 
         result += "\n"
     result += "}\n\n#endif\n"

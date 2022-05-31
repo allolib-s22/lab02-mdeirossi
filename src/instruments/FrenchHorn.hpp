@@ -1,5 +1,5 @@
-#ifndef TRUMPET_HPP
-#define TRUMPET_HPP
+#ifndef FRENCHHORN_HPP
+#define FRENCHHORN_HPP
 
 #include "Gamma/Analysis.h"
 #include "Gamma/Effects.h"
@@ -12,7 +12,7 @@
 
 using namespace gam;
 using namespace al;
-class Trumpet : public SynthVoice {
+class FrenchHorn : public SynthVoice {
 public:
     // Unit generators
     float mNoiseMix;
@@ -33,7 +33,7 @@ public:
         mAmpEnv.sustainPoint(2); // Make point 2 sustain until a release is issued
         mCFEnv.curve(0);
         mBWEnv.curve(0);
-        mOsc.harmonics(17);
+        mOsc.harmonics(19);
 
         createInternalTriggerParameter("amp", 0.2, 0.0, 1.0);
         createInternalTriggerParameter("freq", 60, 20, 5000);
@@ -42,14 +42,14 @@ public:
         createInternalTriggerParameter("sustain", 0.7, 0.0, 1.0);
         createInternalTriggerParameter("noise", 0.025, 0.0, 1.0);
         createInternalTriggerParameter("envDur", 1, 0.0, 5.0);
-        createInternalTriggerParameter("cf1", 2000, 10.0, 5000);
-        createInternalTriggerParameter("cf2", 1900, 10.0, 5000);
-        createInternalTriggerParameter("cfRise", 0.1, 0.1, 2);
-        createInternalTriggerParameter("bw1", 1200, 10.0, 5000);
-        createInternalTriggerParameter("bw2", 1100, 10.0, 5000);
-        createInternalTriggerParameter("bwRise", 0.1, 0.1, 2);
-        createInternalTriggerParameter("hmnum", 17.0, 5.0, 20.0);
-        createInternalTriggerParameter("hmamp", 0.880, 0.0, 1.0);
+        createInternalTriggerParameter("cf1", 850, 10.0, 5000);
+        createInternalTriggerParameter("cf2", 1350, 10.0, 5000);
+        createInternalTriggerParameter("cfRise", 1.8, 0.1, 2);
+        createInternalTriggerParameter("bw1", 1500, 10.0, 5000);
+        createInternalTriggerParameter("bw2", 1800, 10.0, 5000);
+        createInternalTriggerParameter("bwRise", 1.6, 0.1, 2);
+        createInternalTriggerParameter("hmnum", 19.0, 5.0, 20.0);
+        createInternalTriggerParameter("hmamp", 0.600, 0.0, 1.0);
         createInternalTriggerParameter("pan", 0.0, -1.0, 1.0);
     }
 

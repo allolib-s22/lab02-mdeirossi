@@ -6,6 +6,7 @@
 #include "Gamma/Gamma.h"
 #include "Gamma/Oscillator.h"
 #include "Gamma/Types.h"
+#include "Gamma/Filter.h"
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/scene/al_PolySynth.hpp"
@@ -16,7 +17,7 @@
 using namespace gam;
 using namespace al;
 using namespace std;
-class Trumpet : public SynthVoice {
+class Trombone : public SynthVoice {
 public:
 
     // Unit generators
@@ -144,12 +145,81 @@ public:
     }
 };
 
+class Clarinet : public SynthVoice {
+public:
 
+    // Unit generators
+    float mNoiseMix;
+    gam::Square<> mOsc;
+    gam::Pan<> mPan;
+    gam::ADSR<> mAmpEnv;
+    gam::NoiseWhite<> mNoise;
+    gam::Biquad<> LPF;
+
+    // Initialize voice. This function will only be called once per voice
+    void init() override {
+        mAmpEnv.curve(0); // linear segments
+        mAmpEnv.levels(0, 1.0, 1.0, 0); // These tables are not normalized, so scale to 0.3
+        mAmpEnv.sustainPoint(2); // Make point 2 sustain until a release is issued
+        LPF.type(gam::LOW_PASS);
+
+        createInternalTriggerParameter("amplitude", 0.2, 0.0, 1.0);
+        createInternalTriggerParameter("frequency", 60, 20, 5000);
+        createInternalTriggerParameter("attackTime", 0.03, 0.01, 3.0);
+        createInternalTriggerParameter("releaseTime", 0.1, 0.1, 10.0);
+        createInternalTriggerParameter("noise", 0.025, 0.0, 1.0);
+        createInternalTriggerParameter("pan", 0.0, -1.0, 1.0);
+        createInternalTriggerParameter("filterFreq", 4000.0, 0.0, 20000.0);
+        createInternalTriggerParameter("resAmount", 1.0, 1.0, 100);
+    }
+
+    virtual void onProcess(AudioIOData& io) override {
+        float amp = getInternalParameterValue("amplitude");
+        float noiseMix = getInternalParameterValue("noise");
+        float f = getInternalParameterValue("frequency");
+        mAmpEnv.attack(getInternalParameterValue("attackTime"));
+        mAmpEnv.release(getInternalParameterValue("releaseTime"));
+        LPF.freq(getInternalParameterValue("filterFreq"));
+        LPF.res(getInternalParameterValue("resAmount"));
+
+        mOsc.freq(f);
+        while (io()) {
+            // mix oscillator with noise
+            float s1 = mOsc() * (1 - noiseMix) + mNoise() * noiseMix;
+
+            // apply filter
+            s1 = LPF(s1);
+
+            // apply amplitude envelope
+            s1 *= mAmpEnv() * amp;
+            
+            float s2;
+            mPan(s1, s1, s2);
+            io.out(0) += s1;
+            io.out(1) += s2;
+        }
+
+
+        if (mAmpEnv.done()) free();
+    }
+
+    virtual void onProcess(Graphics& g) {
+
+    }
+
+    virtual void onTriggerOn() override {
+        mAmpEnv.reset();
+    }
+
+    virtual void onTriggerOff() override {
+        mAmpEnv.triggerRelease();
+    }
+};
 
 class MyApp : public App
 {
 public:
-    SynthGUIManager<Trumpet> synthManager{ "synth8" };
+    SynthGUIManager<Trombone> synthManager{ "synth8" };
     //    ParameterMIDI parameterMIDI;
 
     virtual void onInit() override {
@@ -198,7 +268,7 @@ public:
             int midiNote = asciiToMIDI(k.key());
             if (midiNote > 0) {
                 synthManager.voice()->setInternalParameterValue(
-                    "frequency", ::pow(2.f, (midiNote - 69.f) / 12.f) * 432.f);
+                    "frequency", ::pow(2.f, (midiNote - 81.f) / 12.f) * 440.f);
                 synthManager.triggerOn(midiNote);
             }
         }
