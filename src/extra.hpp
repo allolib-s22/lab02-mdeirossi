@@ -1,5 +1,5 @@
-#ifndef PARSED_HPP
-#define PARSED_HPP
+#ifndef EXTRA_HPP
+#define EXTRA_HPP
 
 void loadFromXML(Score& score) {
 
