@@ -5,6 +5,12 @@
 # while not ignoring things inside bin/data
 !**/bin/data
 
+
+# CMake
+
+CMakeCache.txt
+CMakeFiles/
+
 # anything named build
 build
 
